@@ -12,7 +12,7 @@ typedef struct SCB_Type_t
     /* CPUID base register (CPUID) 0x00 */
     union
     {
-        volatile uint32_t CPUID;
+        volatile const uint32_t CPUID;
         struct
         {
             volatile const uint32_t Revision : 4;
@@ -547,5 +547,125 @@ typedef struct NVIC_Type_t
 #define NVIC_BASE (0xE000E100U)
 
 #define NVIC ((NVIC_Type *)NVIC_BASE)
+
+/**********************************************************************************************************************
+ *                                                      MPU
+ **********************************************************************************************************************/
+
+typedef struct MPU_Type_t
+{
+    /* MPU type register (MPU_TYPER) 0x00 */
+    union
+    {
+        volatile uint32_t MPU_TYPER;
+        struct
+        {
+            volatile const uint32_t SEPARATE : 1;   /* This bit indicates support for unified or 
+                                                       separate instruction and data memory maps:
+                                                       0 = Unified
+                                                       1 = Separate */
+            volatile const uint32_t : 7;
+            volatile const uint32_t DREGION : 8; /* These bits indicates the number of supported MPU data regions. */
+            volatile const uint32_t IREGION : 8; /* These bits indicates the number of supported MPU instruction regions.
+                                                    Always contains 0x00. The MPU memory map is unified and is described 
+                                                    by the DREGION
+                                                    field */
+            volatile const uint32_t : 8;
+        } MPU_TYPER_b;
+    };
+
+    /* MPU control register (MPU_CR) 0x04 */
+    /* The MPU_CR register:
+    • Enables the MPU
+    • Enables the default memory map background region
+    • Enables use of the MPU when in the hard fault, Non-maskable Interrupt (NMI), and
+    FAULTMASK escalated handlers */
+    union
+    {
+        volatile uint32_t MPU_CR;
+        struct
+        {
+            volatile uint32_t ENABLE : 1;   /* Enables the MPU
+                                            0: MPU disabled
+                                            1: MPU enabled */
+            volatile uint32_t HFNMIENA : 1; /* Enables the operation of MPU during hard fault, NMI, and FAULTMASK handlers.
+                                            When the MPU is enabled:
+                                            0: MPU is disabled during hard fault, NMI, and FAULTMASK handlers, 
+                                            regardless of the value of the ENABLE bit
+                                            1: The MPU is enabled during hard fault, NMI, and FAULTMASK handlers. */
+            volatile uint32_t PRIVDEFENA : 1; /* Enable privileged software access to default memory map.
+                                            0: If the MPU is enabled, disables use of the default memory map. 
+                                            Any memory access to a location not covered by any enabled region causes a fault.
+                                            1: If the MPU is enabled, enables use of the default memory map 
+                                            as a background region for privileged software accesses. */
+            volatile const uint32_t : 29;
+        } MPU_CR_b;
+    };
+
+    /* MPU region number register (MPU_RNR) 0x08 */
+    union
+    {
+        volatile uint32_t MPU_RNR;
+        struct
+        {
+            volatile uint32_t REGION : 8;   /* MPU region */
+            volatile const uint32_t : 24;
+        } MPU_RNR_b;
+    };
+
+    /* MPU region base address register (MPU_RBAR) 0x0C */
+    union
+    {
+        volatile uint32_t MPU_RBAR;
+        struct
+        {
+            volatile uint32_t REGION : 4;   /* MPU region */
+            volatile uint32_t VALID : 1;    /* MPU region number valid
+                                            Write:
+                                            0: MPU_RNR register not changed, and the processor:
+                                            – Updates the base address for the region specified in the RNR
+                                            – Ignores the value of the REGION field
+                                            1: the processor:
+                                            – updates the value of the RNR to the value of the REGION field
+                                            – updates the base address for the region specified in the REGION field */
+            volatile const uint32_t : 5; /* align 32 bytes */
+            volatile uint32_t ADDR : 22; /* Region base address field */
+        } MPU_RBAR_b;
+    };
+
+    /* MPU region attribute and size register (MPU_RASR) 0x10 */
+    union
+    {
+        volatile uint32_t MPU_RASR;
+        struct
+        {
+            volatile uint32_t ENABLE : 1;   /* Region enable bit */
+            volatile uint32_t SIZE : 4;     /* ize of the MPU protection region. */
+            volatile const uint32_t : 2;
+            volatile uint32_t SRD : 8; /* Subregion disable bits.
+                                        For each bit in this field:
+                                        0: corresponding sub-region is enabled
+                                        1: corresponding sub-region is disabled 
+                                        Region sizes of 128 bytes and less do not support subregions. 
+                                        When writing the attributes for such a region, 
+                                        write the SRD field as 0x00. */
+            volatile uint32_t B : 1;
+            volatile uint32_t C : 1;
+            volatile uint32_t S : 1;
+            volatile uint32_t TEX : 3;
+            volatile const uint32_t : 2;
+            volatile uint32_t AP : 3;
+            volatile const uint32_t : 1;
+            volatile uint32_t XN : 1;   /* Instruction access disable bit:
+                                        0: Instruction fetches enabled
+                                        1: Instruction fetches disabled. */
+            volatile const uint32_t : 3;
+        } MPU_RASR_b;
+    };
+} MPU_Type;
+
+#define MPU_BASE (0xE000ED90U)
+
+#define MPU ((MPU_Type *)MPU_BASE)
 
 #endif

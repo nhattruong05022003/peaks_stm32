@@ -7,15 +7,16 @@ LDFLAGS=--specs=nano.specs -L$(SRC_DIR) -T $(SRC_DIR)/stm32_ls.ld  $(SRC_DIR)/me
 
 BSP_DIR=bsp
 BSP_ALL_DIR=bsp/all
-BSP_DEVICE_DIR=bsp/mcu/stm32f1xx/stm32f103
+BSP_SPECIFIC_DEVICE_DIR=bsp/mcu/stm32f1xx/stm32f103
+BSP_DEVICE_DIR=bsp/mcu/stm32f1xx
 SRC_DIR=src
 LIB_DIR=lib
-INCLUDE= -I$(BSP_DIR) -I$(BSP_ALL_DIR) -I$(BSP_DEVICE_DIR) -I$(LIB_DIR) -I$(SRC_DIR)
+INCLUDE= -I$(BSP_DIR) -I$(BSP_ALL_DIR) -I$(BSP_DEVICE_DIR) -I$(BSP_SPECIFIC_DEVICE_DIR) -I$(LIB_DIR) -I$(SRC_DIR)
 
 OUTPUT_DIR=Debug
 
 # List all directories containing source files
-SRC_DIRS = . $(BSP_DIR) $(BSP_ALL_DIR) $(BSP_DEVICE_DIR) $(LIB_DIR) $(SRC_DIR)
+SRC_DIRS = . $(BSP_DIR) $(BSP_ALL_DIR) $(BSP_DEVICE_DIR) $(BSP_SPECIFIC_DEVICE_DIR) $(LIB_DIR) $(SRC_DIR)
 vpath %.c $(SRC_DIRS)
 
 # Find all .c files in those directories
@@ -49,7 +50,7 @@ $(TARGET_HEX): $(TARGET_ELF)
 
 $(TARGET_BIN): $(TARGET_ELF)
 	$(OBJCOPY) -O binary $< $@
-	del /Q Debug\*.o
+	rm Debug/*.o
 
 clean:
-	del /Q Debug\*
+	rm Debug/*

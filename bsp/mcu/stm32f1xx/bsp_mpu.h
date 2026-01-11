@@ -1,0 +1,66 @@
+#ifndef _BSP_MPU_H_
+#define _BSP_MPU_H_
+
+#include "bsp_api.h"
+
+#if (BSP_FEATURE_MPU_IS_AVAILABLE)
+
+/**
+ * @brief Struct contains infor of MPU region's attribute.
+ * Please refer the Cortex M3 document for more detail 
+ * about these element in this struct.
+ */
+typedef struct st_bsp_mpu_attr
+{
+    union
+    {
+        uint16_t attr_value;
+        struct
+        {
+            uint16_t b_bit : 1;
+            uint16_t c_bit : 1;
+            uint16_t s_bit : 1;
+            uint16_t tex : 3;
+            const uint16_t : 2;
+            uint16_t access_permision : 3;
+            const uint16_t : 1;
+            uint16_t xn_bit : 1;
+            const uint16_t : 1;
+        } attr_value_b;
+    };
+} bsp_mpu_attr_t;
+
+/**
+ * @brief Struct contains infor of MPU region
+ */
+typedef struct st_bsp_mpu_region
+{
+    uint32_t base_address; /* base address must align with size */
+    bsp_mpu_attr_t attr;
+    uint8_t size; /* Size of region = 2 ^ (size + 1) 
+                     (min = 5, max = 32) -> (min size = 4, max size = 31) */
+    uint8_t enable;
+    uint8_t no_region;
+} bsp_mpu_region_t;
+
+__STATIC_INLINE void BSP_MPU_Enable(void)
+{
+    MPU->MPU_CR_b.PRIVDEFENA = 1U;
+    MPU->MPU_CR_b.ENABLE = 1U;
+}
+
+__STATIC_INLINE void BSP_MPU_Disable(void)
+{
+    MPU->MPU_CR_b.HFNMIENA = 0U;
+    MPU->MPU_CR_b.PRIVDEFENA = 0U;
+    MPU->MPU_CR_b.ENABLE = 0U;
+}
+
+void BSP_MPU_RegionSet(const bsp_mpu_region_t *p_region);
+void BSP_MPU_RegionGet(uint8_t no_region, bsp_mpu_region_t *p_region);
+void BSP_MPU_RegionEnable(bsp_mpu_region_t *p_region);
+void BSP_MPU_RegionDisable(bsp_mpu_region_t *p_region);
+
+#endif
+
+#endif
