@@ -15,4 +15,7 @@
 #define __STATIC_INLINE         static inline
 #define __STATIC_ALWAYS_INLINE  __attribute__((always_inline)) static inline
 
+#define ASSERT(condition) \
+    if(!(condition)) abort();
+
 #endif
