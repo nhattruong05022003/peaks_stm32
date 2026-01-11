@@ -192,7 +192,7 @@ uint32_t irq_vectors[] __attribute__((section(".irq_vector"))) =
 void System_Init(void)
 {
     /* Copy .data section to SRAM */
-    uint32_t size = (&_edata) - (&_sdata);
+    uint32_t size = (uint32_t)(&_edata) - (uint32_t)(&_sdata);
 
     uint8_t *pDest = (uint8_t *)(&_sdata); // sram
     uint8_t *pSrc = (uint8_t *)(&_la_data); // flash
@@ -203,7 +203,7 @@ void System_Init(void)
     }
 
     /* Init the .bss section to zero in SRAM */ 
-    size = (&_ebss) - (&_sbss);
+    size = (uint32_t)(&_ebss) - (uint32_t)(&_sbss);
     pDest = (uint8_t *)(&_sbss);
     for(uint32_t i = 0; i < size; i++)
     {
@@ -211,7 +211,7 @@ void System_Init(void)
     }
 
     /* Init the .heap section to zero in SRAM */ 
-    size = (&_eheap) - (&_sheap);
+    size = (uint32_t)(&_eheap) - (uint32_t)(&_sheap);
     pDest = (uint8_t *)(&_sheap);
     for(uint32_t i = 0; i < size; i++)
     {
