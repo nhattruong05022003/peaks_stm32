@@ -4,7 +4,10 @@
 
 void abort(void)
 {
-    while(1);
+    while(1)
+    {
+        __asm__ volatile("nop");
+    }
 }
 
 void bsp_ioport_test_case(void)
