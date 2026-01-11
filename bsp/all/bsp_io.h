@@ -44,5 +44,6 @@ typedef enum e_bsp_io_state
 void BSP_IO_Configurate(bsp_io_t pin, uint8_t config);
 void BSP_IO_Write(bsp_io_t pin, bsp_io_state_t state);
 void BSP_IO_Toggle(bsp_io_t pin);
+bsp_io_state_t BSP_IO_Read(bsp_io_t pin);
 
 #endif
