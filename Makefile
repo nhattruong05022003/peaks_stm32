@@ -7,10 +7,17 @@ LDFLAGS=--specs=nano.specs -L$(SRC_DIR) -T $(SRC_DIR)/stm32_ls.ld  $(SRC_DIR)/me
 
 BSP_DIR=bsp
 BSP_ALL_DIR=bsp/all
-BSP_SPECIFIC_DEVICE_DIR=bsp/mcu/stm32f1xx/stm32f103
-BSP_DEVICE_DIR=bsp/mcu/stm32f1xx
 SRC_DIR=src
 LIB_DIR=lib
+
+ifeq ($(CHIP), STM32F103C8)
+BSP_SPECIFIC_DEVICE_DIR=bsp/mcu/stm32f1xx/stm32f103
+BSP_DEVICE_DIR=bsp/mcu/stm32f1xx
+else ifeq ($(CHIP), STM32F103CB)
+BSP_SPECIFIC_DEVICE_DIR=bsp/mcu/stm32f1xx/stm32f103
+BSP_DEVICE_DIR=bsp/mcu/stm32f1xx
+endif
+
 INCLUDE= -I$(BSP_DIR) -I$(BSP_ALL_DIR) -I$(BSP_DEVICE_DIR) -I$(BSP_SPECIFIC_DEVICE_DIR) -I$(LIB_DIR) -I$(SRC_DIR)
 
 OUTPUT_DIR=Debug
