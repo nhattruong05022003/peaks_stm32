@@ -142,21 +142,25 @@ int _execve(char *name, char **argv, char **env)
 **/
 caddr_t _sbrk(int incr)
 {
-	extern char end asm("end");
-	static char *heap_end;
-	char *prev_heap_end;
+	extern char _sheap asm("_sheap");
+	extern char _eheap asm("_eheap");
+    static char *heap_end = NULL;
+    char *prev_heap_end;
 
-	if (heap_end == 0)
-		heap_end = &end;
+    /* Initialize heap_end on the first call */
+    if (heap_end == NULL) {
+        heap_end = &_sheap;
+    }
 
-	prev_heap_end = heap_end;
-	if (heap_end + incr > stack_ptr)
-	{
-		errno = ENOMEM;
-		return (caddr_t) -1;
-	}
+    prev_heap_end = heap_end;
 
-	heap_end += incr;
+    /* Check against the RESERVED heap limit, not the moving stack pointer */
+    if (heap_end + incr > &_eheap) {
+        errno = ENOMEM; // Out of memory
+        return (caddr_t) -1;
+    }
 
-	return (caddr_t) prev_heap_end;
+    heap_end += incr;
+
+    return (caddr_t) prev_heap_end;
 }

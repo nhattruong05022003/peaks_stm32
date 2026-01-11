@@ -5,7 +5,6 @@
 #define SRAM_END ((SRAM_START) + (SRAM_SIZE))
 
 #define STACK_START SRAM_END
-#define BSP_STACK_SIZE (0x400U)
 
 extern uint32_t _etext;
 extern uint32_t _sdata;
@@ -13,11 +12,18 @@ extern uint32_t _sbss;
 extern uint32_t _edata;
 extern uint32_t _ebss;
 extern uint32_t _la_data;
+extern uint32_t _sheap;
+extern uint32_t _eheap;
 
 extern uint32_t SystemClockHz;
 
 /* Stack region */
 uint32_t bsp_main_stack[BSP_STACK_SIZE >> 2] __attribute__((section(".stack")));
+
+#if (BSP_HEAP_SIZE > 0)
+/* Heap heap */
+uint32_t bsp_main_heap[BSP_STACK_SIZE >> 2] __attribute__((section(".heap")));
+#endif
 
 static void clock_init(void);
 
@@ -203,6 +209,15 @@ void System_Init(void)
     {
         *pDest++ = 0;
     }
+
+    /* Init the .heap section to zero in SRAM */ 
+    size = (&_eheap) - (&_sheap);
+    pDest = (uint8_t *)(&_sheap);
+    for(uint32_t i = 0; i < size; i++)
+    {
+        *pDest++ = 0;
+    }
+
     /* Call init function of std library */ 
 
     /* Set up clock */

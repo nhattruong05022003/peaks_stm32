@@ -56,6 +56,15 @@ SECTIONS
         . = ALIGN(4);
     }> SRAM
 
+    .heap :
+    {
+        . = ALIGN(4);
+        _sheap = .;          /* Start of heap symbol */
+        *(.heap*)
+        _eheap = .;          /* End of heap symbol */
+        . = ALIGN(4);
+    } > SRAM
+
     .stack :
     {
         . = ALIGN(4);

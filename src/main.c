@@ -13,3 +13,4 @@ int main(void) {
 }
 
 // arm-none-eabi-gcc -c -mcpu=cortex-m3 -mthumb main.c -o main.o
+// To use malloc function, add --specs=nano.specs in linking flag
