@@ -19,8 +19,8 @@ SECTIONS
         /* merge all .isr_vector section of all input files
         merge all .text section of all input files
         merge all .rodata section of all input files */
-        *(.exception_vector)
-        *(.irq_vector)
+        KEEP(*(.exception_vector))
+        KEEP(*(.irq_vector))
         *(.text)
         *(.text.*)
         *(.init)
@@ -42,6 +42,8 @@ SECTIONS
         _edata = .;
     }> SRAM  AT>  FLASH /* >(vma)AT>(lma) */
 
+    _la_data = LOADADDR(.data); /* This is the physical address in FLASH */
+
     .bss :
     {
         _sbss = .;
@@ -52,8 +54,6 @@ SECTIONS
         _ebss = .;
         __bss_end__ = _ebss;
         . = ALIGN(4);
-
-        
     }> SRAM
 
     .stack :

@@ -12,6 +12,7 @@ extern uint32_t _sdata;
 extern uint32_t _sbss;
 extern uint32_t _edata;
 extern uint32_t _ebss;
+extern uint32_t _la_data;
 
 extern uint32_t SystemClockHz;
 
@@ -188,7 +189,7 @@ void System_Init(void)
     uint32_t size = (&_edata) - (&_sdata);
 
     uint8_t *pDest = (uint8_t *)(&_sdata); // sram
-    uint8_t *pSrc = (uint8_t *)(&_etext); // flash
+    uint8_t *pSrc = (uint8_t *)(&_la_data); // flash
 
     for(uint32_t i = 0; i < size; i++)
     {
