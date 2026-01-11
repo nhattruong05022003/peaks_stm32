@@ -43,12 +43,27 @@ typedef struct st_bsp_mpu_region
     uint8_t no_region;
 } bsp_mpu_region_t;
 
-__STATIC_INLINE void BSP_MPU_Enable(void)
+/**********************************************************************************************************************
+ * @brief Enable MPU
+ *
+ * @param priv_defend_enable: Param specific whether privileged software access is allowed to
+ *                            a location that is not covered by any enabled region.
+ * @param hf_nmi_enable: Param specific whether the operation of MPU during hard fault, NMI, and 
+ *                       FAULTMASK handlers wil be enabled
+ * @return None
+ *********************************************************************************************************************/
+__STATIC_INLINE void BSP_MPU_Enable(uint8_t priv_defend_enable, uint8_t hf_nmi_enable)
 {
-    MPU->MPU_CR_b.PRIVDEFENA = 1U;
+    MPU->MPU_CR_b.HFNMIENA = (hf_nmi_enable & 0x01U);
+    MPU->MPU_CR_b.PRIVDEFENA = (priv_defend_enable & 0x01U);
     MPU->MPU_CR_b.ENABLE = 1U;
 }
 
+/**********************************************************************************************************************
+ * @brief Disbale MPU
+ *
+ * @return None
+ *********************************************************************************************************************/
 __STATIC_INLINE void BSP_MPU_Disable(void)
 {
     MPU->MPU_CR_b.HFNMIENA = 0U;
