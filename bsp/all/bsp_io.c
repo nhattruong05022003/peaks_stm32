@@ -39,6 +39,17 @@ void BSP_IO_Configurate(bsp_io_t pin, uint8_t config)
         /* Config pin */
         bsp_port_list[config_port]->CRL |= (config << (config_pin * 4U));
     }
+
+    /* Set up initialize state for output or pull up / down for input */
+    config = (config & (1U << 5U)) >> 5U;
+    if(0U == config)
+    {
+        bsp_port_list[config_port]->ODR &= ~(1U << config_pin);
+    }
+    else
+    {
+        bsp_port_list[config_port]->ODR |= (1U << config_pin);
+    }
 }
 
 /**********************************************************************************************************************

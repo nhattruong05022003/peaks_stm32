@@ -7,6 +7,24 @@
 #define BSP_IO_CONFIG_SHIFT (16U)
 
 /**
+ * @brief Initialize state of output pin
+ */
+typedef enum e_bsp_io_output_init_state
+{
+    BSP_IO_OUTPUT_INIT_STATE_LOW = (0U << 5U),
+    BSP_IO_OUTPUT_INIT_STATE_HIGH = (1U << 5U)
+} bsp_io_output_init_state_t;
+
+/**
+ * @brief Initialize state of output pin
+ */
+typedef enum e_bsp_io_input_pull_mode
+{
+    BSP_IO_INPUT_PULL_MODE_PULLLOW = (0U << 5U),
+    BSP_IO_INPUT_PULL_MODE_PULLHIGH = (1U << 5U)
+} bsp_io_input_pull_mode_t;
+
+/**
  * @brief IO Port configuration
  */
 typedef enum e_bsp_io_config
