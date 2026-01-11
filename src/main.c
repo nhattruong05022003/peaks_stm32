@@ -1,5 +1,9 @@
 #include "main.h"
 
+#if (RUN_BSP_TEST_CASE)
+extern void bsp_run_test(void);
+#endif
+
 int main(void) {
     while (1) 
     {

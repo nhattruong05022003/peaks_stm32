@@ -3,4 +3,6 @@
 
 #include "bsp_api.h"
 
+#define RUN_BSP_TEST_CASE (0U)
+
 #endif
