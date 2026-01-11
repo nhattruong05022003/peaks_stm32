@@ -18,4 +18,6 @@
 #define ASSERT(condition) \
     if(!(condition)) abort();
 
+#define PARAM_UNUSED(param) (void)(param)
+
 #endif

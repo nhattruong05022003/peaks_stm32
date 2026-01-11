@@ -7,6 +7,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/times.h>
+#include "bsp_common.h"
 
 /* Variables */
 //#undef errno
@@ -31,6 +32,8 @@ int _getpid(void)
 
 int _kill(int pid, int sig)
 {
+	PARAM_UNUSED(pid);
+	PARAM_UNUSED(sig);
 	errno = EINVAL;
 	return -1;
 }
@@ -43,6 +46,7 @@ void _exit (int status)
 
 __attribute__((weak)) int _read(int file, char *ptr, int len)
 {
+	PARAM_UNUSED(file);
 	int DataIdx;
 
 	for (DataIdx = 0; DataIdx < len; DataIdx++)
@@ -55,6 +59,7 @@ return len;
 
 __attribute__((weak)) int _write(int file, char *ptr, int len)
 {
+	PARAM_UNUSED(file);
 	int DataIdx;
 
 	for (DataIdx = 0; DataIdx < len; DataIdx++)
@@ -66,57 +71,71 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
 
 int _close(int file)
 {
+	PARAM_UNUSED(file);
 	return -1;
 }
 
 
 int _fstat(int file, struct stat *st)
 {
+	PARAM_UNUSED(file);
 	st->st_mode = S_IFCHR;
 	return 0;
 }
 
 int _isatty(int file)
 {
+	PARAM_UNUSED(file);
 	return 1;
 }
 
 int _lseek(int file, int ptr, int dir)
 {
+	PARAM_UNUSED(file);
+	PARAM_UNUSED(ptr);
+	PARAM_UNUSED(dir);
 	return 0;
 }
 
 int _open(char *path, int flags, ...)
 {
+	PARAM_UNUSED(path);
+	PARAM_UNUSED(flags);
 	/* Pretend like we always fail */
 	return -1;
 }
 
 int _wait(int *status)
 {
+	PARAM_UNUSED(status);
 	errno = ECHILD;
 	return -1;
 }
 
 int _unlink(char *name)
 {
+	PARAM_UNUSED(name);
 	errno = ENOENT;
 	return -1;
 }
 
 int _times(struct tms *buf)
 {
+	PARAM_UNUSED(buf);
 	return -1;
 }
 
 int _stat(char *file, struct stat *st)
 {
+	PARAM_UNUSED(file);
 	st->st_mode = S_IFCHR;
 	return 0;
 }
 
 int _link(char *old, char *new)
 {
+	PARAM_UNUSED(old);
+	PARAM_UNUSED(new);
 	errno = EMLINK;
 	return -1;
 }
@@ -129,6 +148,9 @@ int _fork(void)
 
 int _execve(char *name, char **argv, char **env)
 {
+	PARAM_UNUSED(name);
+	PARAM_UNUSED(argv);
+	PARAM_UNUSED(env);
 	errno = ENOMEM;
 	return -1;
 }
