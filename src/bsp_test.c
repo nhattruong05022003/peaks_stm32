@@ -81,7 +81,7 @@ void bsp_irq_test_case(void)
     BSP_IRQ_SetPendingIRQ((IRQn_t) RTC_IRQHandler_IRQ_Num);
     timeout = 0xFFU;
     while((timeout--) && (bsp_irq_num == 0xFFU));
-    /* Verify the bsp_irq_num get the right number */
+    /* Verify the bsp_irq_num get the number of RTC not WDT since WDT IRQ has been cleared pending */
     ASSERT(timeout);
     ASSERT(bsp_irq_num == RTC_IRQHandler_IRQ_Num);
 
