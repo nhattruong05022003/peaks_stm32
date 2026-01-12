@@ -161,27 +161,27 @@ int _execve(char *name, char **argv, char **env)
  _sbrk
  Increase program data space. Malloc and related functions depend on this
 **/
-caddr_t _sbrk(int incr)
+caddr_t _sbrk(uint32_t incr)
 {
-	extern char _sheap asm("_sheap");
-	extern char _eheap asm("_eheap");
-    static char *heap_end = NULL;
-    char *prev_heap_end;
+	extern uint8_t _sheap asm("_sheap");
+	extern uint8_t _eheap asm("_eheap");
+	static uint8_t *heap_end = NULL;
+	uint8_t *prev_heap_end;
 
-    /* Initialize heap_end on the first call */
-    if (heap_end == NULL) {
-        heap_end = &_sheap;
-    }
+	/* Initialize heap_end on the first call */
+	if (heap_end == NULL) {
+		heap_end = (uint8_t *)&_sheap;
+	}
 
-    prev_heap_end = heap_end;
+	prev_heap_end = heap_end;
 
-    /* Check against the RESERVED heap limit, not the moving stack pointer */
-    if (heap_end + incr > &_eheap) {
-        errno = ENOMEM; // Out of memory
-        return (caddr_t) -1;
-    }
+	/* Check against the RESERVED heap limit, not the moving stack pointer */
+	if ((uint32_t)(heap_end) + (uint32_t)(incr) > (uint32_t)(&_eheap)) {
+		errno = ENOMEM; // Out of memory
+		return (caddr_t) -1;
+	}
 
-    heap_end += incr;
+	heap_end += (uint32_t)incr;
 
-    return (caddr_t) prev_heap_end;
+	return (caddr_t) prev_heap_end;
 }

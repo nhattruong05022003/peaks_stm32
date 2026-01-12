@@ -10,6 +10,10 @@ void abort(void)
     }
 }
 
+/**********************************************************************************************************************
+ * @brief Test case testing IO Port.
+ * Expect: Read / Write GPIO normally.
+ *********************************************************************************************************************/
 void bsp_ioport_test_case(void)
 {
     BSP_IO_Configurate(BSP_IO_PORTA_PIN_0, BSP_IO_CONFIG_OUTPUT_GPIO_PUSH_PULL | BSP_IO_MODE_OUTPUT_50MHZ | BSP_IO_OUTPUT_INIT_STATE_HIGH);
@@ -25,10 +29,77 @@ void bsp_ioport_test_case(void)
     ASSERT((GPIOA->ODR & 0x01) == BSP_IO_STATE_LOW);
     ASSERT(BSP_IO_Read(BSP_IO_PORTA_PIN_1) == BSP_IO_STATE_LOW);
 }
+
+uint8_t bsp_irq_num = 0xFFU;
+
+void WWDG_IRQHandler(void)
+{
+    bsp_irq_num = BSP_IRQ_GetIRQNumber();
+}
+
+void RTC_IRQHandler(void)
+{
+    bsp_irq_num = BSP_IRQ_GetIRQNumber();
+
+    /* Trigger WDT IRQ */
+    BSP_IRQ_SetPendingIRQ((IRQn_t) WWDG_IRQHandler_IRQ_Num);
+    /* Immediately clear the pending WDT IRQ */
+    BSP_IRQ_ClearPendingIRQ((IRQn_t) WWDG_IRQHandler_IRQ_Num);
+}
+/**********************************************************************************************************************
+ * @brief Test case testing IRQ.
+ * Expect: Functions related to IRQ can work normally.
+ *********************************************************************************************************************/
+void bsp_irq_test_case(void)
+{
+    volatile uint8_t timeout;
+    /* Enable WDT IRQ */
+    BSP_IRQ_Enable((IRQn_t) WWDG_IRQHandler_IRQ_Num);
+    ASSERT((NVIC->ISER[0] & 0x01U) == (1U));
+
+    /* Set priority 12 for WDT IRQ */
+    BSP_IRQ_SetPriority((IRQn_t) WWDG_IRQHandler_IRQ_Num, 12U);
+    ASSERT(BSP_IRQ_GetPriority((IRQn_t) WWDG_IRQHandler_IRQ_Num) == (12U));
+
+    /* Trigger WDT IRQ */
+    BSP_IRQ_SetPendingIRQ((IRQn_t) WWDG_IRQHandler_IRQ_Num);
+    timeout = 0xFFU;
+    while((timeout--) && (bsp_irq_num == 0xFFU));
+    /* Verify the bsp_irq_num get the right number */
+    ASSERT(timeout);
+    ASSERT(bsp_irq_num == WWDG_IRQHandler_IRQ_Num);
+
+    /* Enable RTC IRQ */
+    BSP_IRQ_Enable((IRQn_t) RTC_IRQHandler_IRQ_Num);
+    ASSERT((NVIC->ISER[0] & (0x01U << 3U)) == (1U << 3U));
+
+    /* Set priority 11 for RTC IRQ */
+    BSP_IRQ_SetPriority((IRQn_t) RTC_IRQHandler_IRQ_Num, 11U);
+    ASSERT(BSP_IRQ_GetPriority((IRQn_t) RTC_IRQHandler_IRQ_Num) == (11U));
+
+    bsp_irq_num = 0xFFU;
+    BSP_IRQ_SetPendingIRQ((IRQn_t) RTC_IRQHandler_IRQ_Num);
+    timeout = 0xFFU;
+    while((timeout--) && (bsp_irq_num == 0xFFU));
+    /* Verify the bsp_irq_num get the right number */
+    ASSERT(timeout);
+    ASSERT(bsp_irq_num == RTC_IRQHandler_IRQ_Num);
+
+    BSP_IRQ_Disable((IRQn_t) WWDG_IRQHandler_IRQ_Num);
+    ASSERT((NVIC->ISER[0] & 0x01U) == (0U));
+
+    BSP_IRQ_Disable((IRQn_t) RTC_IRQHandler_IRQ_Num);
+    ASSERT((NVIC->ISER[0] & (0x01U << 3U)) == 0U);
+}
+
 #if (BSP_HEAP_SIZE > 0)
 
-#define BSP_MALLOC_TEST_LENGTH 64U
+#define BSP_MALLOC_TEST_LENGTH 128U
 
+/**********************************************************************************************************************
+ * @brief Test case testing heap region.
+ * Expect: Using malloc, calloc to allocate the arrays in heap section normally.
+ *********************************************************************************************************************/
 void bsp_heap_test_case(void)
 {
     uint8_t i = 0U;
@@ -70,6 +141,7 @@ void bsp_heap_test_case(void)
 void bsp_run_test(void)
 {
     bsp_ioport_test_case();
+    bsp_irq_test_case();
 #if (BSP_HEAP_SIZE > 0)
     bsp_heap_test_case();
 #endif
