@@ -27,38 +27,42 @@ void bsp_ioport_test_case(void)
 }
 #if (BSP_HEAP_SIZE > 0)
 
+#define BSP_MALLOC_TEST_LENGTH 64U
+
 void bsp_heap_test_case(void)
 {
-    uint8_t *p_malloc = malloc(4);
+    uint8_t i = 0U;
+    uint8_t *p_malloc;
+    uint8_t *p_malloc_1;
+    
+    /* Test case 1: Malloc */
+    p_malloc = malloc(BSP_MALLOC_TEST_LENGTH);
     ASSERT(p_malloc != NULL);
-    p_malloc[0] = 1;
-    p_malloc[1] = 2;
-    p_malloc[2] = 3;
-    p_malloc[3] = 4;
+
+    for(i = 0U; i < BSP_MALLOC_TEST_LENGTH; i++)
+    {
+        p_malloc[i] = i;
+    }
+
     free(p_malloc);
 
-    uint8_t *p_malloc_1 = malloc(4);
-    p_malloc = malloc(4);
+    /* Test case 1: Calloc */
+    p_malloc_1 = calloc(BSP_MALLOC_TEST_LENGTH, 1U);
+    p_malloc = calloc(BSP_MALLOC_TEST_LENGTH, 1U);
     ASSERT(p_malloc_1 != NULL);
     ASSERT(p_malloc != NULL);
-    p_malloc[0] = 5;
-    p_malloc[1] = 6;
-    p_malloc[2] = 7;
-    p_malloc[3] = 8;
-    p_malloc_1[0] = 9;
-    p_malloc_1[1] = 10;
-    p_malloc_1[2] = 11;
-    p_malloc_1[3] = 12;
+
+    for(i = 0U; i < BSP_MALLOC_TEST_LENGTH; i++)
+    {
+        ASSERT(p_malloc[i] == p_malloc_1[i]);
+    }
+
     free(p_malloc);
     free(p_malloc_1);
 
-    p_malloc = malloc(5);
-    ASSERT(p_malloc != NULL);
-    p_malloc[0] = 1;
-    p_malloc[1] = 2;
-    p_malloc[2] = 3;
-    p_malloc[3] = 4;
-    p_malloc[4] = 5;
+    /* Test case 3: Malloc with size exceed the heap region */
+    p_malloc = malloc(0x500);
+    ASSERT(p_malloc == NULL);
 }
 
 #endif
