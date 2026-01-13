@@ -7,8 +7,10 @@
 #define UsageFault_Handler_IRQ_Num          ((IRQn_t) -5)
 #define SVC_Handler_IRQ_Num                 ((IRQn_t) -4)
 #define DebugMon_Handler_IRQ_Num            ((IRQn_t) -3)
-#define endSV_Handler_IRQ_Num               ((IRQn_t) -2)
+#define PendSV_Handler_IRQ_Num              ((IRQn_t) -2)
 #define SysTick_Handler_IRQ_Num             ((IRQn_t) -1)
+
+#define BSP_EXCEPTION_OFFSET                (7)
 
 /* Interrupt */
 #define WWDG_IRQHandler_IRQ_Num             ((IRQn_t) 0)

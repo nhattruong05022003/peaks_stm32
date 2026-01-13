@@ -92,6 +92,32 @@ void bsp_irq_test_case(void)
     ASSERT((NVIC->ISER[0] & (0x01U << 3U)) == 0U);
 }
 
+void PendSV_Handler(void)
+{
+    /* Trigger SVC exception */
+    BSP_IRQ_SetPendingIRQ((IRQn_t) SVC_Handler_IRQ_Num);
+    /* Immediately clear the pending SVC exception */
+    BSP_IRQ_ClearPendingIRQ((IRQn_t) SVC_Handler_IRQ_Num);
+}
+
+/**********************************************************************************************************************
+ * @brief Test case testing Exception.
+ * Expect: Functions related to Exception can work normally.
+ *********************************************************************************************************************/
+void bsp_exception_test_case(void)
+{
+    /* Set priority 10 for SVC exception */
+    BSP_IRQ_SetPriority((IRQn_t) SVC_Handler_IRQ_Num, 10U);
+    ASSERT(BSP_IRQ_GetPriority((IRQn_t) SVC_Handler_IRQ_Num) == (10U));
+
+    /* Set priority 9 for PendSV exception */
+    BSP_IRQ_SetPriority((IRQn_t) PendSV_Handler_IRQ_Num, 9U);
+    ASSERT(BSP_IRQ_GetPriority((IRQn_t) PendSV_Handler_IRQ_Num) == (9U));
+
+    /* Trigger SVC exception */
+    BSP_IRQ_SetPendingIRQ((IRQn_t) PendSV_Handler_IRQ_Num);
+}
+
 #if (BSP_HEAP_SIZE > 0)
 
 #define BSP_MALLOC_TEST_LENGTH 128U
@@ -142,6 +168,7 @@ void bsp_run_test(void)
 {
     bsp_ioport_test_case();
     bsp_irq_test_case();
+    bsp_exception_test_case();
 #if (BSP_HEAP_SIZE > 0)
     bsp_heap_test_case();
 #endif

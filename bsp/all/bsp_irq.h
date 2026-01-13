@@ -4,28 +4,36 @@
 #include "bsp_api.h"
 #include "bsp_irq_driver.h"
 
+extern uint8_t* bsp_exception_priority_regs[];
+
 /**********************************************************************************************************************
- * @brief Enable specific interrupt.
+ * @brief Enable specific interrupt. Only for interrupt events, not including exception.
  *
- * @param IRQn: The IRQ channel number to be enabled.
+ * @param IRQn: The IRQ channel number to be enabled. (Must be greater than or equal 0)
  *
  * @return None
  *********************************************************************************************************************/
 __STATIC_INLINE void BSP_IRQ_Enable(IRQn_t IRQn)
 {
-    NVIC->ISER[IRQn / 32U] |= (1U << (IRQn % 32U));
+    if(IRQn >= (IRQn_t) 0)
+    {
+        NVIC->ISER[IRQn / 32U] |= (1U << (IRQn % 32U));
+    }
 }
 
 /**********************************************************************************************************************
- * @brief Disable specific interrupt.
+ * @brief Disable specific interrupt. Only for interrupt events, not including exception.
  *
- * @param IRQn: The IRQ channel number to be disabled.
+ * @param IRQn: The IRQ channel number to be disabled. (Must be greater than or equal 0)
  *
  * @return None
  *********************************************************************************************************************/
 __STATIC_INLINE void BSP_IRQ_Disable(IRQn_t IRQn)
 {
-    NVIC->ICER[IRQn / 32U] |= (1U << (IRQn % 32U));
+    if(IRQn >= (IRQn_t) 0)
+    {
+        NVIC->ICER[IRQn / 32U] |= (1U << (IRQn % 32U));
+    }
 }
 
 /**********************************************************************************************************************
@@ -38,7 +46,14 @@ __STATIC_INLINE void BSP_IRQ_Disable(IRQn_t IRQn)
  *********************************************************************************************************************/
 __STATIC_INLINE void BSP_IRQ_SetPriority (IRQn_t IRQn, uint32_t priority)
 {
-    NVIC->IPR[IRQn] = ((uint8_t)(priority & 0x0FU)) << 4U;
+    if(IRQn < (IRQn_t) 0)
+    {
+        *bsp_exception_priority_regs[(IRQn + BSP_EXCEPTION_OFFSET)] = ((uint8_t)(priority & 0x0FU)) << 4U;
+    }
+    else
+    {
+        NVIC->IPR[IRQn] = ((uint8_t)(priority & 0x0FU)) << 4U;
+    }
 }
 
 /**********************************************************************************************************************
@@ -50,11 +65,20 @@ __STATIC_INLINE void BSP_IRQ_SetPriority (IRQn_t IRQn, uint32_t priority)
  *********************************************************************************************************************/
 __STATIC_INLINE uint8_t BSP_IRQ_GetPriority (IRQn_t IRQn)
 {
-    return (uint8_t) (NVIC->IPR[IRQn] >> 4U);
+    uint8_t priority_value;
+    if(IRQn < (IRQn_t) 0)
+    {
+        priority_value = *bsp_exception_priority_regs[(IRQn + BSP_EXCEPTION_OFFSET)];
+    }
+    else
+    {
+        priority_value = NVIC->IPR[IRQn];
+    }
+    return (uint8_t) (priority_value >> 4U);
 }
 
 /**********************************************************************************************************************
- * @brief Set IRQn pending.
+ * @brief Set IRQn pending. Only for interrupt events, SysTick and PendSV exception.
  *
  * @param IRQn: The IRQ channel number to be set to pending state.
  *
@@ -62,11 +86,26 @@ __STATIC_INLINE uint8_t BSP_IRQ_GetPriority (IRQn_t IRQn)
  *********************************************************************************************************************/
 __STATIC_INLINE void BSP_IRQ_SetPendingIRQ (IRQn_t IRQn)
 {
-    NVIC->ISPR[IRQn / 32U] |= (1U << (IRQn % 32U));
+    if(IRQn == PendSV_Handler_IRQ_Num)
+    {
+        SCB->ICSR_b.PENDSVSET = 1U;
+    }
+    else if (IRQn == SysTick_Handler_IRQ_Num)
+    {
+        SCB->ICSR_b.PENDSTSET = 1U;
+    }
+    else if(IRQn >= (IRQn_t) 0)
+    {
+        NVIC->ISPR[IRQn / 32U] |= (1U << (IRQn % 32U));
+    }
+    else
+    {
+        /* Do nothing */
+    }
 }
 
 /**********************************************************************************************************************
- * @brief Clear IRQn pending.
+ * @brief Clear IRQn pending. Only for interrupt events, SysTick and PendSV exception.
  *
  * @param IRQn: The IRQ channel number to be cleared the pending state.
  *
@@ -74,7 +113,22 @@ __STATIC_INLINE void BSP_IRQ_SetPendingIRQ (IRQn_t IRQn)
  *********************************************************************************************************************/
 __STATIC_INLINE void BSP_IRQ_ClearPendingIRQ (IRQn_t IRQn)
 {
-    NVIC->ICPR[IRQn / 32U] |= (1U << (IRQn % 32U));
+    if(IRQn == PendSV_Handler_IRQ_Num)
+    {
+        SCB->ICSR_b.PENDSVCLR = 1U;
+    }
+    else if (IRQn == SysTick_Handler_IRQ_Num)
+    {
+        SCB->ICSR_b.PENDSTCLR = 1U;
+    }
+    else if(IRQn >= (IRQn_t) 0)
+    {
+        NVIC->ICPR[IRQn / 32U] |= (1U << (IRQn % 32U));
+    }
+    else
+    {
+        /* Do nothing */
+    }
 }
 
 /**********************************************************************************************************************
