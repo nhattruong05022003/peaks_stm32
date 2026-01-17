@@ -100,6 +100,12 @@ void PendSV_Handler(void)
     BSP_IRQ_ClearPendingIRQ((IRQn_t) SVC_Handler_IRQ_Num);
 }
 
+uint8_t nmi_handler_execute = 0U;
+void NMI_Handler(void)
+{
+    nmi_handler_execute = 1U;
+}
+
 /**********************************************************************************************************************
  * @brief Test case testing Exception.
  * Expect: Functions related to Exception can work normally.
@@ -116,6 +122,11 @@ void bsp_exception_test_case(void)
 
     /* Trigger SVC exception */
     BSP_IRQ_SetPendingIRQ((IRQn_t) PendSV_Handler_IRQ_Num);
+
+    nmi_handler_execute = 0U;
+    /* Trigger NMI exception */
+    BSP_IRQ_SetPendingNMIHandler();
+    ASSERT(1U == nmi_handler_execute);
 }
 
 #if (BSP_HEAP_SIZE > 0)
