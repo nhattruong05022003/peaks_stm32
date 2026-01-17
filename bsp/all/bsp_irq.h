@@ -105,6 +105,16 @@ __STATIC_INLINE void BSP_IRQ_SetPendingIRQ (IRQn_t IRQn)
 }
 
 /**********************************************************************************************************************
+ * @brief Set pending state for NMI Handler.
+ *
+ * @return None
+ *********************************************************************************************************************/
+__STATIC_INLINE void BSP_IRQ_SetPendingNMIHandler (void)
+{
+    SCB->ICSR_b.NMIPENDSET = 1U;
+}
+
+/**********************************************************************************************************************
  * @brief Clear IRQn pending. Only for interrupt events, SysTick and PendSV exception.
  *
  * @param IRQn: The IRQ channel number to be cleared the pending state.
