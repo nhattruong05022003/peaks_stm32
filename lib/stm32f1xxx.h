@@ -756,6 +756,6 @@ typedef struct PWR_Type_t
 
 #define PWR_BASE        (0x40007000U)
 
-#define PWR ((PWR_Type *)DMA1_BASE)
+#define PWR ((PWR_Type *)PWR_BASE)
 
 #endif
