@@ -59,6 +59,6 @@ static void bsp_standby_mode_trigger(void)
     RCC->APB1ENR_b.PWREN = 1U;      /* Ensure Power Clock has been enabled */
     SCB->SCR_b.SLEEPDEEP = 1U;      /* Enable Cortex-M3 Deep Sleep */
     PWR->CR_b.PDDS = 1U;            /* PDDS = 1 (Standby mode) */
-    PWR->CR_b.CWUF = 1U;            /* Clear Wakeup Flag */
+    BSP_McuReset_WakeUpFlagClear();
     __WFI();                        /* Wait For Interrupt */ 
 }
