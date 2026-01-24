@@ -36,7 +36,7 @@ static void bsp_light_sleep_mode_trigger(void)
 }
 
 /**********************************************************************************************************************
- * @brief Enter deep sleep mode.
+ * @brief  Enter deep sleep mode.
  *
  * @return None
  *********************************************************************************************************************/
@@ -46,17 +46,17 @@ static void bsp_deep_sleep_mode_trigger(void)
     SCB->SCR_b.SLEEPDEEP = 1U;      /* Enable Cortex-M3 Deep Sleep */
     PWR->CR_b.PDDS = 0U;            /* PDDS = 0 (Stop Mode) */
     PWR->CR_b.LPDS = 1U;            /* Voltage regulator in low-power mode during Stop mode */
+    BSP_McuReset_WakeUpFlagClear();
     __WFI();                        /* Wait For Interrupt */ 
 }
 
 /**********************************************************************************************************************
- * @brief Configurate PA0 as wake-up pin event and enter standby sleep mode.
+ * @brief Enter standby sleep mode.
  *
  * @return None
  *********************************************************************************************************************/
 static void bsp_standby_mode_trigger(void)
 {
-    BSP_McuReset_ConfigWakeUpPin();
     RCC->APB1ENR_b.PWREN = 1U;      /* Ensure Power Clock has been enabled */
     SCB->SCR_b.SLEEPDEEP = 1U;      /* Enable Cortex-M3 Deep Sleep */
     PWR->CR_b.PDDS = 1U;            /* PDDS = 1 (Standby mode) */

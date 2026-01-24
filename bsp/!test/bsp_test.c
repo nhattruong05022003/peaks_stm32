@@ -179,6 +179,7 @@ void bsp_mcu_reset_test_case(void)
 {
     if(PWR->CSR_b.WUF != 1U)
     {
+        BSP_McuReset_ConfigWakeUpPin();
         BSP_McuReset_LowPowerModeTrigger(BSP_LOW_POWER_MODE_STANDBY);
         while(1);
     }
