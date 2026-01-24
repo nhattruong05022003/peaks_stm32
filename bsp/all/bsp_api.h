@@ -16,4 +16,6 @@
 #include "bsp_mpu.h"
 #endif
 
+#include "bsp_mcu_reset.h"
+
 #endif

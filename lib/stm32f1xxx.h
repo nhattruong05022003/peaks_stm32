@@ -666,4 +666,96 @@ typedef struct AFIO_Type_t
 #define GPIOG ((GPIOx_Type *)GPIOG_BASE)
 #define AFIO  ((AFIO_Type *)AFIO_BASE)
 
+/**********************************************************************************************************************
+ *                                                      PWR
+ **********************************************************************************************************************/
+typedef struct PWR_Type_t
+{   
+    /* Power control register (PWR_CR) 0x00 */
+    union
+    {
+        volatile uint32_t CR;
+        struct
+        {
+            volatile uint32_t LPDS : 1; /* Low-power deepsleep.
+                                        This bit is set and cleared by software. 
+                                        It works together with the PDDS bit.
+                                        0: Voltage regulator on during Stop mode
+                                        1: Voltage regulator in low-power mode during Stop mode */
+            volatile uint32_t PDDS : 1; /* Power down deepsleep.
+                                        This bit is set and cleared by software. 
+                                        It works together with the LPDS bit.
+                                        0: Enter Stop mode when the CPU enters Deepsleep. 
+                                        The regulator status depends on the
+                                        LPDS bit.
+                                        1: Enter Standby mode when the CPU enters Deepsleep. */
+            volatile uint32_t CWUF : 1; /* Clear wakeup flag.
+                                        This bit is always read as 0.
+                                        0: No effect
+                                        1: Clear the WUF Wakeup Flag after 
+                                        2 System clock cycles. (write) */
+            volatile uint32_t CSBF : 1; /* Clear standby flag.
+                                        This bit is always read as 0.
+                                        0: No effect
+                                        1: Clear the SBF Standby Flag (write) */
+            volatile uint32_t PVDE : 1; /* programmable voltage detector enable.
+                                        This bit is set and cleared by software.
+                                        0: PVD disabled
+                                        1: PVD enabled */
+            volatile uint32_t PLS : 3; /* PVD level selection.
+                                        These bits are written by software to select the voltage threshold detected by the
+                                        programmable voltage detector */
+            volatile uint32_t DBP : 1; /* Disable backup domain write protection.
+                                        In reset state, the RTC and backup registers 
+                                        are protected against parasitic write access.
+                                        This bit must be set to enable write access to 
+                                        these registers.
+                                        0: Access to RTC and Backup registers disabled
+                                        1: Access to RTC and Backup registers enabled */
+            const volatile uint32_t : 23;
+        } CR_b;
+    };
+
+    /* Power control/status register (PWR_CSR) 0x04. */
+    union
+    {
+        volatile uint32_t CSR;
+        struct
+        {
+            const volatile uint32_t WUF : 1; /* This bit is set by hardware and cleared by hardware, 
+                                        by a system reset or by setting the
+                                        CWUF bit in the Power control register (PWR_CR)
+                                        0: No wakeup event occurred
+                                        1: A wakeup event was received from the WKUP pin or 
+                                        from the RTC alarm */
+            const volatile uint32_t SBF : 1; /* This bit is set by hardware and cleared only 
+                                                by a POR/PDR (power on reset/power down reset)
+                                                or by setting the CSBF bit in the Power control 
+                                                register (PWR_CR)
+                                                0: Device has not been in Standby mode
+                                                1: Device has been in Standby mode */
+            volatile uint32_t PVDO : 1; /* This bit is set and cleared by hardware. 
+                                        It is valid only if PVD is enabled by the PVDE bit.
+                                        0: VDD/VDDA is higher than the PVD threshold 
+                                        selected with the PLS[2:0] bits.
+                                        1: VDD/VDDA is lower than the PVD threshold 
+                                        selected with the PLS[2:0] bits. */
+            volatile uint32_t : 5;
+            volatile uint32_t EWUP : 1; /* This bit is set and cleared by software.
+                                        0: WKUP pin is used for general purpose I/O. 
+                                        An event on the WKUP pin does not wakeup
+                                        the device from Standby mode.
+                                        1: WKUP pin is used for wakeup from Standby mode and 
+                                        forced in input pull down
+                                        configuration (rising edge on WKUP pin wakes-up 
+                                        the system from Standby mode). */
+            volatile uint32_t : 23;
+        } CSR_b;
+    };
+} PWR_Type;
+
+#define PWR_BASE        (0x40007000U)
+
+#define PWR ((PWR_Type *)PWR_BASE)
+
 #endif
