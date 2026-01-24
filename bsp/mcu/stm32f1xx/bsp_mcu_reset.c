@@ -42,6 +42,7 @@ static void bsp_light_sleep_mode_trigger(void)
  *********************************************************************************************************************/
 static void bsp_deep_sleep_mode_trigger(void)
 {
+    BSP_McuReset_ConfigWakeUpPin();
     RCC->APB1ENR_b.PWREN = 1U;      /* Ensure Power Clock has been enabled */
     SCB->SCR_b.SLEEPDEEP = 1U;      /* Enable Cortex-M3 Deep Sleep */
     PWR->CR_b.PDDS = 0U;            /* PDDS = 0 (Stop Mode) */
