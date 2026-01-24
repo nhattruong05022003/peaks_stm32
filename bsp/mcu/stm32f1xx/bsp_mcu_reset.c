@@ -50,7 +50,7 @@ static void bsp_deep_sleep_mode_trigger(void)
 }
 
 /**********************************************************************************************************************
- * @brief Enter standby sleep mode.
+ * @brief Configurate PA0 as wake-up pin event and enter standby sleep mode.
  *
  * @return None
  *********************************************************************************************************************/
