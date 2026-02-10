@@ -670,7 +670,7 @@ typedef struct AFIO_Type_t
  *                                                      PWR
  **********************************************************************************************************************/
 typedef struct PWR_Type_t
-{   
+{
     /* Power control register (PWR_CR) 0x00 */
     union
     {
@@ -757,5 +757,667 @@ typedef struct PWR_Type_t
 #define PWR_BASE        (0x40007000U)
 
 #define PWR ((PWR_Type *)PWR_BASE)
+
+/**********************************************************************************************************************
+ *                                                      DMA
+ **********************************************************************************************************************/
+typedef struct DMAx_Type_t
+{   
+    /* DMA interrupt status register (DMA_ISR) 0x00 */
+    union
+    {
+        const volatile uint32_t ISR;
+        struct
+        {
+            const volatile uint32_t GIF1 : 1; /* Channel 1 global interrupt flag */
+            const volatile uint32_t TCIF1 : 1; /* Channel 1 transfer complete flag */
+            const volatile uint32_t HTIF1 : 1; /* Channel 1 half transfer flag */
+            const volatile uint32_t TEIF1 : 1; /* Channel 1 transfer error flag */
+            const volatile uint32_t GIF2 : 1; /* Channel 2 global interrupt flag */
+            const volatile uint32_t TCIF2 : 1; /* Channel 2 transfer complete flag */
+            const volatile uint32_t HTIF2 : 1; /* Channel 2 half transfer flag */
+            const volatile uint32_t TEIF2 : 1; /* Channel 2 transfer error flag */
+            const volatile uint32_t GIF3 : 1; /* Channel 3 global interrupt flag */
+            const volatile uint32_t TCIF3 : 1; /* Channel 3 transfer complete flag */
+            const volatile uint32_t HTIF3 : 1; /* Channel 3 half transfer flag */
+            const volatile uint32_t TEIF3 : 1; /* Channel 3 transfer error flag */
+            const volatile uint32_t GIF4 : 1; /* Channel 4 global interrupt flag */
+            const volatile uint32_t TCIF4 : 1; /* Channel 4 transfer complete flag */
+            const volatile uint32_t HTIF4 : 1; /* Channel 4 half transfer flag */
+            const volatile uint32_t TEIF4 : 1; /* Channel 4 transfer error flag */
+            const volatile uint32_t GIF5 : 1; /* Channel 5 global interrupt flag */
+            const volatile uint32_t TCIF5 : 1; /* Channel 5 transfer complete flag */
+            const volatile uint32_t HTIF5 : 1; /* Channel 5 half transfer flag */
+            const volatile uint32_t TEIF5 : 1; /* Channel 5 transfer error flag */
+            const volatile uint32_t GIF6 : 1; /* Channel 6 global interrupt flag */
+            const volatile uint32_t TCIF6 : 1; /* Channel 6 transfer complete flag */
+            const volatile uint32_t HTIF6: 1; /* Channel 6 half transfer flag */
+            const volatile uint32_t TEIF6 : 1; /* Channel 6 transfer error flag */
+            const volatile uint32_t GIF7 : 1; /* Channel 7 global interrupt flag */
+            const volatile uint32_t TCIF7 : 1; /* Channel 7 transfer complete flag */
+            const volatile uint32_t HTIF7 : 1; /* Channel 7 half transfer flag */
+            const volatile uint32_t TEIF7 : 1; /* Channel 7 transfer error flag */
+            const volatile uint32_t : 4;
+        } ISR_b;
+    };
+
+    /* DMA interrupt flag clear register (DMA_IFCR) 0x04. Write 1 to clear */
+    union
+    {
+        volatile uint32_t IFCR;
+        struct
+        {
+            volatile uint32_t CGIF1 : 1; /* Channel 1 global interrupt clear */
+            volatile uint32_t CTCIF1 : 1; /* Channel 1 transfer complete clear */
+            volatile uint32_t CHTIF1 : 1; /* Channel 1 half transfer clear */
+            volatile uint32_t CTEIF1 : 1; /* Channel 1 transfer error clear */
+            volatile uint32_t CGIF2 : 1; /* Channel 2 global interrupt clear */
+            volatile uint32_t CTCIF2 : 1; /* Channel 2 transfer complete clear */
+            volatile uint32_t CHTIF2 : 1; /* Channel 2 half transfer clear */
+            volatile uint32_t CTEIF2 : 1; /* Channel 2 transfer error clear */
+            volatile uint32_t CGIF3 : 1; /* Channel 3 global interrupt clear */
+            volatile uint32_t CTCIF3 : 1; /* Channel 3 transfer complete clear */
+            volatile uint32_t CHTIF3 : 1; /* Channel 3 half transfer clear */
+            volatile uint32_t CTEIF3 : 1; /* Channel 3 transfer error clear */
+            volatile uint32_t CGIF4 : 1; /* Channel 4 global interrupt clear */
+            volatile uint32_t CTCIF4 : 1; /* Channel 4 transfer complete clear */
+            volatile uint32_t CHTIF4 : 1; /* Channel 4 half transfer clear */
+            volatile uint32_t CTEIF4 : 1; /* Channel 4 transfer error clear */
+            volatile uint32_t CGIF5 : 1; /* Channel 5 global interrupt clear */
+            volatile uint32_t CTCIF5 : 1; /* Channel 5 transfer complete clear */
+            volatile uint32_t CHTIF5 : 1; /* Channel 5 half transfer clear */
+            volatile uint32_t CTEIF5 : 1; /* Channel 5 transfer error clear */
+            volatile uint32_t CGIF6 : 1; /* Channel 6 global interrupt clear */
+            volatile uint32_t CTCIF6 : 1; /* Channel 6 transfer complete clear */
+            volatile uint32_t CHTIF6: 1; /* Channel 6 half transfer clear */
+            volatile uint32_t CTEIF6 : 1; /* Channel 6 transfer error clear */
+            volatile uint32_t CGIF7 : 1; /* Channel 7 global interrupt clear */
+            volatile uint32_t CTCIF7 : 1; /* Channel 7 transfer complete clear */
+            volatile uint32_t CHTIF7 : 1; /* Channel 7 half transfer clear */
+            volatile uint32_t CTEIF7 : 1; /* Channel 7 transfer error clear */
+            const volatile uint32_t : 4;
+        } IFCR_b;
+    };
+
+    /* DMA channel 1 configuration register (DMA_CCR1) */
+    union
+    {
+        volatile uint32_t CCR1;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR1_b;
+    };
+
+    /* DMA channel 1 number of data register (DMA_CNDTR1) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR1;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR1_b;
+    };
+
+    /* DMA channel 1 peripheral address register (DMA_CPAR1) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR1;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR1_b;
+    };
+
+    /* DMA channel 1 memory address register (DMA_CMAR1) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR1;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR1_b;
+    };
+
+    const uint32_t RESERVED0;
+
+    /* DMA channel 2 configuration register (DMA_CCR2) */
+    union
+    {
+        volatile uint32_t CCR2;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR2_b;
+    };
+
+    /* DMA channel 2 number of data register (DMA_CNDTR2) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR2;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR2_b;
+    };
+
+    /* DMA channel 2 peripheral address register (DMA_CPAR2) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR2;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR2_b;
+    };
+
+    /* DMA channel 2 memory address register (DMA_CMAR2) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR2;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR2_b;
+    };
+
+    const uint32_t RESERVED1;
+
+    /* DMA channel 3 configuration register (DMA_CCR3) */
+    union
+    {
+        volatile uint32_t CCR3;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR3_b;
+    };
+
+    /* DMA channel 3 number of data register (DMA_CNDTR3) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR3;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR3_b;
+    };
+
+    /* DMA channel 3 peripheral address register (DMA_CPAR3) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR3;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR3_b;
+    };
+
+    /* DMA channel 3 memory address register (DMA_CMAR3) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR3;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR3_b;
+    };
+
+    const uint32_t RESERVED2;
+
+    /* DMA channel 4 configuration register (DMA_CCR4) */
+    union
+    {
+        volatile uint32_t CCR4;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR4_b;
+    };
+
+    /* DMA channel 4 number of data register (DMA_CNDTR4) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR4;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR4_b;
+    };
+
+    /* DMA channel 4 peripheral address register (DMA_CPAR4) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR4;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR4_b;
+    };
+
+    /* DMA channel 4 memory address register (DMA_CMAR4) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR4;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR4_b;
+    };
+
+    const uint32_t RESERVED3;
+
+    /* DMA channel 5 configuration register (DMA_CCR5) */
+    union
+    {
+        volatile uint32_t CCR5;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR5_b;
+    };
+
+    /* DMA channel 5 number of data register (DMA_CNDTR5) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR5;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR5_b;
+    };
+
+    /* DMA channel 5 peripheral address register (DMA_CPAR5) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR5;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR5_b;
+    };
+
+    /* DMA channel 5 memory address register (DMA_CMAR5) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR5;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR5_b;
+    };
+
+    const uint32_t RESERVED4;
+
+    /* DMA channel 6 configuration register (DMA_CCR6) */
+    union
+    {
+        volatile uint32_t CCR6;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR6_b;
+    };
+
+    /* DMA channel 6 number of data register (DMA_CNDTR6) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR6;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR6_b;
+    };
+
+    /* DMA channel 6 peripheral address register (DMA_CPAR6) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR6;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR6_b;
+    };
+
+    /* DMA channel 6 memory address register (DMA_CMAR6) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR6;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR6_b;
+    };
+
+    const uint32_t RESERVED5;
+
+    /* DMA channel 7 configuration register (DMA_CCR7) */
+    union
+    {
+        volatile uint32_t CCR7;
+        struct
+        {
+            volatile uint32_t EN : 1; /*  Channel enable */
+            volatile uint32_t TCIE : 1; /* Transfer complete interrupt enable */
+            volatile uint32_t HTIE : 1; /* Half transfer interrupt enable */
+            volatile uint32_t TEIE : 1; /* Transfer error interrupt enable */
+            volatile uint32_t DIR : 1; /* Data transfer direction 
+                                        0: Read from peripheral
+                                        1: Read from memory*/
+            volatile uint32_t CIRC : 1; /* Circular mode */
+            volatile uint32_t PINC : 1; /* Peripheral increment mode */
+            volatile uint32_t MINC : 1; /* Memory increment mode */
+            volatile uint32_t PSIZE : 2; /* Peripheral size 
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t MSIZE : 2; /* Memory size
+                                            00: 8-bits
+                                            01: 16-bits
+                                            10: 32-bits
+                                            11: Reserved */
+            volatile uint32_t PL : 2;   /*  Channel priority level 
+                                            00: Low
+                                            01: Medium
+                                            10: High
+                                            11: Very high */
+            volatile uint32_t MEM2MEM : 1; /* Memory to memory mode */
+            const volatile uint32_t : 17;
+        } CCR7_b;
+    };
+
+    /* DMA channel 7 number of data register (DMA_CNDTR7) */
+    union
+    {
+        /* This register can only be 
+        written when the channel is disabled. Once the channel is enabled, 
+        this register is read-only, indicating the remaining bytes to be transmitted. 
+        This register decrements after each DMA transfer.
+        Once the transfer is completed, this register can either stay at zero or be reloaded
+        automatically by the value previously programmed if the channel is configured in autoreload mode.
+        If this register is zero, no transaction can be served whether the channel is enabled or not.*/
+        volatile uint32_t CNDTR7;
+        struct
+        {
+            volatile uint32_t NDT : 16; /* Number of data to transfer. */
+            const volatile uint32_t : 16;
+        } CNDTR7_b;
+    };
+
+    /* DMA channel 7 peripheral address register (DMA_CPAR7) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CPAR7;
+        struct
+        {
+            volatile uint32_t PA : 32; /* Peripheral address. Base address of the peripheral data register 
+                                          from/to which the data will be read/written. */
+        } CPAR7_b;
+    };
+
+    /* DMA channel 7 memory address register (DMA_CMAR7) */
+    union
+    {
+        /* This register must not be written when the channel is enabled */
+
+        volatile uint32_t CMAR7;
+        struct
+        {
+            volatile uint32_t MA : 32; /* Memory address. Base address of the memory address register 
+                                          from/to which the data will be read/written. */
+        } CMAR7_b;
+    };
+
+    const uint32_t RESERVED6;
+} DMAx_Type;
+
+#define DMA1_BASE        (0x40020000U)
+#define DMA2_BASE        (0x40020400U)
+
+#define DMA1 ((DMAx_Type *)DMA1_BASE)
+#define DMA2 ((DMAx_Type *)DMA2_BASE)
 
 #endif
