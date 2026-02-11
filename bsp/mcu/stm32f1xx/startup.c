@@ -1,7 +1,5 @@
 #include "bsp_common.h"
-
-#define SRAM_START 0x20000000U
-#define SRAM_SIZE (20U * 1024U) // 20 KB
+#include "bsp_feature.h"
 
 extern uint32_t _estack;
 
