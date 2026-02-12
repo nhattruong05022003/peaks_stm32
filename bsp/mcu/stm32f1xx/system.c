@@ -165,10 +165,12 @@ uint32_t irq_vectors[] __attribute__((section(".irq_vector"))) =
     (uint32_t)&UART5_IRQHandler,        // 53
     (uint32_t)&TIM6_IRQHandler,         // 54
     (uint32_t)&TIM7_IRQHandler,         // 55
+#if (BSP_FEATURE_DMA2_IS_AVAILABLE)
     (uint32_t)&DMA_IRQHandler,          // 56
     (uint32_t)&DMA_IRQHandler,          // 57
     (uint32_t)&DMA_IRQHandler,          // 58
     (uint32_t)&DMA_IRQHandler           // 59
+#endif
 };
 
 /**********************************************************************************************************************

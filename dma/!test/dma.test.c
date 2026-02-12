@@ -283,7 +283,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
     /* Verify the callback function */
     ASSERT(tranfer_error_irq_flag == 1U);
 
-    /* Test case 5 */
+    /* Test case 4 */
     tranfer_irq_flag = 0U;
     half_tranfer_irq_flag = 0U;
     dma_cfg1.tranfer_ipl = 12U;
@@ -317,7 +317,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
     /* Verify the callback function */
     ASSERT(tranfer_irq_flag == 1U);
 
-    /* Test case 6 */
+    /* Test case 5 */
     tranfer_irq_flag = 0U;
     tranfer_irq_flag1 = 0U;
 
