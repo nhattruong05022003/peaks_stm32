@@ -378,6 +378,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
     ASSERT(tranfer_irq_flag1 == 1U);
 }
 
+#if (BSP_FEATURE_DMA2_IS_AVAILABLE)
 void dma2_mem_2_mem_test_case(void)
 {
     uint16_t i;
@@ -440,6 +441,7 @@ void dma2_mem_2_mem_test_case(void)
     ASSERT(tranfer_irq_flag == 1U);
     ASSERT(tranfer_irq_flag1 == 1U);
 }
+#endif
 
 void dma_run_test(void)
 {
