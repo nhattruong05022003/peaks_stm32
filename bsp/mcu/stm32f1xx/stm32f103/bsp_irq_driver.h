@@ -74,4 +74,6 @@
 #define DMA2_Channel3_IRQHandler_IRQ_Num    ((IRQn_t) 58)
 #define DMA2_Channel4_5_IRQHandler_IRQ_Num  ((IRQn_t) 59)
 
+#define BSP_TOTAL_IRQ                       (60U)
+
 #endif

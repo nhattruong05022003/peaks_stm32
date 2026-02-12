@@ -1,5 +1,8 @@
 #include "bsp_irq.h"
 
+/* Table contains pointer to control struct of module */
+void *bsp_irq_context_table[BSP_TOTAL_IRQ];
+
 /* Array contains exception priority registers' address */
 uint8_t* bsp_exception_priority_regs[] =
 {

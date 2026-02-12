@@ -7,6 +7,8 @@
 /* SRAM size */
 #define SRAM_SIZE (20U * 1024U) // 20 KB
 
+#define SRAM_END ((SRAM_START) + (SRAM_SIZE))
+
 /* Stack region size */
 #define BSP_STACK_SIZE (0x400U)
 

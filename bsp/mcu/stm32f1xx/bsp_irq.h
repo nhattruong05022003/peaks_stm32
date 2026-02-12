@@ -5,6 +5,7 @@
 #include "bsp_irq_driver.h"
 
 extern uint8_t* bsp_exception_priority_regs[];
+extern void *bsp_irq_context_table[BSP_TOTAL_IRQ];
 
 /**********************************************************************************************************************
  * @brief Enable specific interrupt. Only for interrupt events, not including exception.
@@ -150,6 +151,31 @@ __STATIC_INLINE IRQn_t BSP_IRQ_GetIRQNumber (void)
 {
     IRQn_t irq_num = (IRQn_t)((__get_xPSR() & 0xFFU) - 16u);
     return irq_num;
+}
+
+/**********************************************************************************************************************
+ * @brief Set context for Interrupt. Only used for Interrupt.
+ *
+ * @param IRQn: The IRQ channel number.
+ * @param priority: Pointer to control struct of module
+ *
+ * @return None
+ *********************************************************************************************************************/
+__STATIC_INLINE void BSP_IRQ_SetContext (IRQn_t IRQn, void *context)
+{
+    bsp_irq_context_table[IRQn] = context;
+}
+
+/**********************************************************************************************************************
+ * @brief Get the context of Interrupt.
+ *
+ * @param IRQn: The IRQ channel number.
+ *
+ * @return The context of Interrupt.
+ *********************************************************************************************************************/
+__STATIC_INLINE void* BSP_IRQ_GetContext (IRQn_t IRQn)
+{
+    return bsp_irq_context_table[IRQn];
 }
 
 #endif
