@@ -8,6 +8,33 @@
 #define DMA_TRANFER_ERROR_IRQ_FLAG(channel) (1U << ((channel * 4U) + 3U))
 
 /**
+ * @brief  Summary of DMA1 Request Mapping
+ * | Peripherals | Ch 1    | Ch 2      | Ch 3      | Ch 4      | Ch 5      | Ch 6      | Ch 7      |
+ * |-------------|---------|-----------|-----------|-----------|-----------|-----------|-----------|
+ * | ADC1        | ADC1    | -         | -         | -         | -         | -         | -         |
+ * | SPI/I2S     | -       | SPI1_RX   | SPI1_TX   | SPI2_RX   | SPI2_TX   | -         | -         |
+ * | USART       | -       | USART3_TX | USART3_RX | USART1_TX | USART1_RX | USART2_RX | USART2_TX |
+ * | I2C         | -       | -         | -         | I2C2_TX   | I2C2_RX   | I2C1_TX   | I2C1_RX   |
+ * | TIM1        | -       | TIM1_CH1  | -         | TIM1_CH4  | TIM1_UP   | -         | -         |
+ * |             |         |           |           | TIM1_TRIG | TIM1_CH3  |           |           |
+ * |             |         |           |           | TIM1_COM  |           |           |           |
+ * | TIM2        | TIM2_CH3| TIM2_UP   | -         | -         | TIM2_CH1  | -         | TIM2_CH2  |
+ * |             |         |           |           |           | TIM2_CH4  |           |           |
+ * | TIM3        | -       | TIM3_CH3  | TIM3_CH4  | -         | -         | TIM3_CH1  | -         |
+ * |             |         |           | TIM3_UP   |           |           | TIM3_TRIG |           |
+ * | TIM4        | TIM4_CH1| -         | -         | TIM4_CH2  | TIM4_CH3  | -         | TIM4_UP   |
+ *
+ * @note Memory-to-Memory (M2M) mode is supported on all channels.
+ */
+
+/**
+ * @brief DMA2 controller
+ * The five requests from the peripherals (TIMx[5,6,7,8], ADC3, SPI/I2S3, UART4,
+ * DAC_Channel[1,2] and SDIO) are simply logically ORed before entering the DMA2, this
+ * means that only one request must be enabled at a time.
+ */
+
+/**
  * @brief DMA Unit
  */
 typedef enum e_dma_unit
