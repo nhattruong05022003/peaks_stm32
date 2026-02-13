@@ -145,7 +145,7 @@ __STATIC_INLINE void BSP_IRQ_ClearPendingIRQ (IRQn_t IRQn)
 /**********************************************************************************************************************
  * @brief Get IRQ number of the current active interrupt.
  *
- * @return None
+ * @return IRQ number
  *********************************************************************************************************************/
 __STATIC_INLINE IRQn_t BSP_IRQ_GetIRQNumber (void)
 {
