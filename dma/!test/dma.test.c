@@ -69,7 +69,7 @@ void DMA_user_callback(void *p_args)
     if((p_ctrl->p_reg->ISR & DMA_HALF_TRANFER_IRQ_FLAG(channel)) && \
         (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.HTIE))
     {
-        half_tranfer_irq_flag ++;
+        half_tranfer_irq_flag = 1U;
     }
 
     if((p_ctrl->p_reg->ISR & DMA_TRANFER_ERROR_IRQ_FLAG(channel)) && \
@@ -95,7 +95,7 @@ void DMA_user_callback_1(void *p_args)
     if((p_ctrl->p_reg->ISR & DMA_HALF_TRANFER_IRQ_FLAG(channel)) && \
         (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.HTIE))
     {
-        half_tranfer_irq_flag1 ++;
+        half_tranfer_irq_flag1 = 1U;
     }
 }
 

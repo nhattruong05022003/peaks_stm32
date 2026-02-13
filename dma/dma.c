@@ -296,6 +296,17 @@ void DMA_IRQHandler(void)
     dma_ctrl_t *p_ctrl = (dma_ctrl_t *) BSP_IRQ_GetContext(irq);
     uint8_t channel = p_ctrl->p_cfg->channel - 1U;
 
+    if((p_ctrl->p_reg->ISR & DMA_HALF_TRANFER_IRQ_FLAG(channel)) && \
+        (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.HTIE))
+    {
+        if(p_ctrl->p_callback != NULL)
+        {
+            p_ctrl->p_callback((void *) p_ctrl);
+        }
+
+        p_ctrl->p_reg->IFCR |= DMA_HALF_TRANFER_IRQ_FLAG(channel);
+    }
+
     if((p_ctrl->p_reg->ISR & DMA_TRANFER_IRQ_FLAG(channel)) && \
         (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.TCIE))
     {
@@ -305,17 +316,6 @@ void DMA_IRQHandler(void)
         }
 
         p_ctrl->p_reg->IFCR |= DMA_TRANFER_IRQ_FLAG(channel);
-        p_ctrl->p_reg->IFCR |= DMA_HALF_TRANFER_IRQ_FLAG(channel);
-    }
-
-    if((p_ctrl->p_reg->ISR & DMA_HALF_TRANFER_IRQ_FLAG(channel)) && \
-        (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.HTIE))
-    {
-        if(p_ctrl->p_callback != NULL)
-        {
-            p_ctrl->p_callback((void *) p_ctrl);
-        }
-
         p_ctrl->p_reg->IFCR |= DMA_HALF_TRANFER_IRQ_FLAG(channel);
     }
 
