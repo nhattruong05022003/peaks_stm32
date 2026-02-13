@@ -11,6 +11,14 @@ static DMAx_Type * dma_unit_list[] =
 #endif
 };
 
+/**********************************************************************************************************************
+ * @brief Configurate DMA with the specific configuration.
+ *
+ * @param p_ctrl: Pointer to control struct.
+ * @param p_cfg: Pointer to configuration struct.
+ *
+ * @return None
+ *********************************************************************************************************************/
 void DMA_Open(dma_ctrl_t *p_ctrl, const dma_cfg_t *p_cfg)
 {
     ASSERT(p_ctrl);
@@ -142,6 +150,16 @@ void DMA_Open(dma_ctrl_t *p_ctrl, const dma_cfg_t *p_cfg)
     p_ctrl->open = DMA_OPEN;
 }
 
+/**********************************************************************************************************************
+ * @brief Start DMA tranfer.
+ *
+ * @param p_ctrl: Pointer to control struct.
+ * @param src_address: Address of the source data.
+ * @param dest_address: Address of the destination data.
+ * @param size: Size of the source data.
+ *
+ * @return None
+ *********************************************************************************************************************/
 void DMA_Start(dma_ctrl_t *p_ctrl, const uint32_t src_address, const uint32_t dest_address, uint16_t size)
 {
     ASSERT(p_ctrl);
@@ -160,6 +178,13 @@ void DMA_Start(dma_ctrl_t *p_ctrl, const uint32_t src_address, const uint32_t de
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 1U;
 }
 
+/**********************************************************************************************************************
+ * @brief Stop DMA tranfer.
+ *
+ * @param p_ctrl: Pointer to control struct.
+ *
+ * @return None
+ *********************************************************************************************************************/
 void DMA_Stop(dma_ctrl_t *p_ctrl)
 {
     ASSERT(p_ctrl);
@@ -178,6 +203,13 @@ void DMA_Stop(dma_ctrl_t *p_ctrl)
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 0U;
 }
 
+/**********************************************************************************************************************
+ * @brief De-configurate the DMA configuration.
+ *
+ * @param p_ctrl: Pointer to control struct.
+ *
+ * @return None
+ *********************************************************************************************************************/
 void DMA_Close(dma_ctrl_t *p_ctrl)
 {
     ASSERT(p_ctrl);
@@ -207,7 +239,7 @@ void DMA_Close(dma_ctrl_t *p_ctrl)
     /* Clear DMA priority */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.PL = 0U;
 
-    /* Set up Tranfer Interrupt */
+    /* Disable Tranfer Interrupt */
     if(p_cfg->tranfer_ipl != BSP_IRQ_DISABLE)
     {
         IRQn_t irq_num;
@@ -231,7 +263,7 @@ void DMA_Close(dma_ctrl_t *p_ctrl)
         BSP_IRQ_SetContext(irq_num, NULL);
     }
 
-    /* Set up Half-Tranfer Interrupt */
+    /* Disable Half-Tranfer Interrupt */
     if(p_cfg->half_tranfer_ipl != BSP_IRQ_DISABLE)
     {
         IRQn_t irq_num;
@@ -255,7 +287,7 @@ void DMA_Close(dma_ctrl_t *p_ctrl)
         BSP_IRQ_SetContext(irq_num, NULL);
     }
 
-    /* Set up Error Interrupt */
+    /* Disable Error Interrupt */
     if(p_cfg->err_ipl != BSP_IRQ_DISABLE)
     {
         IRQn_t irq_num;
@@ -288,6 +320,13 @@ void DMA_Close(dma_ctrl_t *p_ctrl)
     p_ctrl->open = 0U;
 }
 
+/**********************************************************************************************************************
+ * @brief De-configurate the DMA configuration.
+ *
+ * @param p_ctrl: Pointer to control struct.
+ *
+ * @return None
+ *********************************************************************************************************************/
 void DMA_IRQHandler(void)
 {
     /* Get Irq Number */
@@ -296,6 +335,7 @@ void DMA_IRQHandler(void)
     dma_ctrl_t *p_ctrl = (dma_ctrl_t *) BSP_IRQ_GetContext(irq);
     uint8_t channel = p_ctrl->p_cfg->channel - 1U;
 
+    /* Check whether this is the half-tranfer complete interrupt */
     if((p_ctrl->p_reg->ISR & DMA_HALF_TRANFER_IRQ_FLAG(channel)) && \
         (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.HTIE))
     {
@@ -307,6 +347,7 @@ void DMA_IRQHandler(void)
         p_ctrl->p_reg->IFCR |= DMA_HALF_TRANFER_IRQ_FLAG(channel);
     }
 
+    /* Check whether this is the tranfer complete interrupt */
     if((p_ctrl->p_reg->ISR & DMA_TRANFER_IRQ_FLAG(channel)) && \
         (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.TCIE))
     {
@@ -319,6 +360,7 @@ void DMA_IRQHandler(void)
         p_ctrl->p_reg->IFCR |= DMA_HALF_TRANFER_IRQ_FLAG(channel);
     }
 
+    /* Check whether this is the tranfer error interrupt */
     if((p_ctrl->p_reg->ISR & DMA_TRANFER_ERROR_IRQ_FLAG(channel)) && \
         (p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.TEIE))
     {
