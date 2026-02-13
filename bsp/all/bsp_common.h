@@ -20,4 +20,6 @@
 
 #define PARAM_UNUSED(param) (void)(param)
 
+#define BSP_IRQ_DISABLE (0xFFU)
+
 #endif

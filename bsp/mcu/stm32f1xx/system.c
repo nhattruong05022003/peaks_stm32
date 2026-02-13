@@ -1,8 +1,5 @@
 #include "bsp_api.h"
-
-#define SRAM_START 0x20000000U
-#define SRAM_SIZE (20U * 1024U) // 20 KB
-#define SRAM_END ((SRAM_START) + (SRAM_SIZE))
+#include "bsp_feature.h"
 
 #define STACK_START SRAM_END
 
@@ -53,13 +50,7 @@ void EXTI1_IRQHandler(void)                __attribute__((weak, alias("Default_H
 void EXTI2_IRQHandler(void)                __attribute__((weak, alias("Default_Handler")));  // 8
 void EXTI3_IRQHandler(void)                __attribute__((weak, alias("Default_Handler")));  // 9
 void EXTI4_IRQHandler(void)                __attribute__((weak, alias("Default_Handler")));  // 10
-void DMA1_Channel1_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 11
-void DMA1_Channel2_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 12
-void DMA1_Channel3_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 13
-void DMA1_Channel4_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 14
-void DMA1_Channel5_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 15
-void DMA1_Channel6_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 16
-void DMA1_Channel7_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 17
+void DMA_IRQHandler(void)                  __attribute__((weak, alias("Default_Handler")));  // 11,12,13,14,15,16,17,56,57,58,59
 void ADC1_2_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 18
 void USB_HP_CAN_TX_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 19
 void USB_LP_CAN_RX0_IRQHandler(void)       __attribute__((weak, alias("Default_Handler")));  // 20
@@ -98,10 +89,6 @@ void UART4_IRQHandler(void)                __attribute__((weak, alias("Default_H
 void UART5_IRQHandler(void)                __attribute__((weak, alias("Default_Handler")));  // 53
 void TIM6_IRQHandler(void)                 __attribute__((weak, alias("Default_Handler")));  // 54
 void TIM7_IRQHandler(void)                 __attribute__((weak, alias("Default_Handler")));  // 55
-void DMA2_Channel1_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 56
-void DMA2_Channel2_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 57
-void DMA2_Channel3_IRQHandler(void)        __attribute__((weak, alias("Default_Handler")));  // 58
-void DMA2_Channel4_5_IRQHandler(void)      __attribute__((weak, alias("Default_Handler")));  // 59
 
 uint32_t exception_vectors[] __attribute__((section(".exception_vector"))) = 
 {
@@ -133,13 +120,13 @@ uint32_t irq_vectors[] __attribute__((section(".irq_vector"))) =
     (uint32_t)&EXTI2_IRQHandler,        // 8
     (uint32_t)&EXTI3_IRQHandler,        // 9
     (uint32_t)&EXTI4_IRQHandler,        // 10
-    (uint32_t)&DMA1_Channel1_IRQHandler,// 11
-    (uint32_t)&DMA1_Channel2_IRQHandler,// 12
-    (uint32_t)&DMA1_Channel3_IRQHandler,// 13
-    (uint32_t)&DMA1_Channel4_IRQHandler,// 14
-    (uint32_t)&DMA1_Channel5_IRQHandler,// 15
-    (uint32_t)&DMA1_Channel6_IRQHandler,// 16
-    (uint32_t)&DMA1_Channel7_IRQHandler,// 17
+    (uint32_t)&DMA_IRQHandler,          // 11
+    (uint32_t)&DMA_IRQHandler,          // 12
+    (uint32_t)&DMA_IRQHandler,          // 13
+    (uint32_t)&DMA_IRQHandler,          // 14
+    (uint32_t)&DMA_IRQHandler,          // 15
+    (uint32_t)&DMA_IRQHandler,          // 16
+    (uint32_t)&DMA_IRQHandler,          // 17
     (uint32_t)&ADC1_2_IRQHandler,       // 18
     (uint32_t)&USB_HP_CAN_TX_IRQHandler,// 19
     (uint32_t)&USB_LP_CAN_RX0_IRQHandler,// 20
@@ -178,10 +165,12 @@ uint32_t irq_vectors[] __attribute__((section(".irq_vector"))) =
     (uint32_t)&UART5_IRQHandler,        // 53
     (uint32_t)&TIM6_IRQHandler,         // 54
     (uint32_t)&TIM7_IRQHandler,         // 55
-    (uint32_t)&DMA2_Channel1_IRQHandler,// 56
-    (uint32_t)&DMA2_Channel2_IRQHandler,// 57
-    (uint32_t)&DMA2_Channel3_IRQHandler,// 58
-    (uint32_t)&DMA2_Channel4_5_IRQHandler // 59
+#if (BSP_FEATURE_DMA2_IS_AVAILABLE)
+    (uint32_t)&DMA_IRQHandler,          // 56
+    (uint32_t)&DMA_IRQHandler,          // 57
+    (uint32_t)&DMA_IRQHandler,          // 58
+    (uint32_t)&DMA_IRQHandler           // 59
+#endif
 };
 
 /**********************************************************************************************************************
