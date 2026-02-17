@@ -4,7 +4,20 @@
 extern void bsp_run_test(void);
 #endif
 
+#if (RUN_DMA_TEST_CASE)
+extern void dma_run_test(void);
+#endif
+
 int main(void) {
+
+#if (RUN_BSP_TEST_CASE)
+    bsp_run_test();
+#endif
+
+#if (RUN_DMA_TEST_CASE)
+    dma_run_test();
+#endif
+
     while (1) 
     {
 
