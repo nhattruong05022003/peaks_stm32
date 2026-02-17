@@ -154,7 +154,7 @@ void bsp_heap_test_case(void)
 
     free(p_malloc);
 
-    /* Test case 1: Calloc */
+    /* Test case 2: Calloc */
     p_malloc_1 = calloc(BSP_MALLOC_TEST_LENGTH, 1U);
     p_malloc = calloc(BSP_MALLOC_TEST_LENGTH, 1U);
     ASSERT(p_malloc_1 != NULL);
