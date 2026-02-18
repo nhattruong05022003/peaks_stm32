@@ -29,7 +29,7 @@ void BSP_IO_Configurate(bsp_io_t pin, uint8_t config)
         bsp_port_list[config_port]->CRH &= ~(0x0FU << ((config_pin - 8U) * 4U));
 
         /* Config pin */
-        bsp_port_list[config_port]->CRH |= (config << ((config_pin - 8U)* 4U));
+        bsp_port_list[config_port]->CRH |= ((config & 0x0F) << ((config_pin - 8U)* 4U));
     }
     else
     {
@@ -37,7 +37,7 @@ void BSP_IO_Configurate(bsp_io_t pin, uint8_t config)
         bsp_port_list[config_port]->CRL &= ~(0x0FU << (config_pin * 4U));
 
         /* Config pin */
-        bsp_port_list[config_port]->CRL |= (config << (config_pin * 4U));
+        bsp_port_list[config_port]->CRL |= ((config & 0x0F) << (config_pin * 4U));
     }
 
     /* Set up initialize state for output or pull up / down for input */
