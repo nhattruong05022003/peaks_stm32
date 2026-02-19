@@ -117,7 +117,7 @@ void dma_mem_2_mem_test_case(void)
     DMA_Open(&dma_ctrl1, &dma_cfg1);
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     /* Clear interrupt flag */
     dma_ctrl1.p_reg->IFCR |= 1U;
@@ -142,7 +142,7 @@ void dma_mem_2_mem_test_case(void)
 
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     /* Clear interrupt flag */
     dma_ctrl1.p_reg->IFCR |= 1U;
@@ -172,7 +172,7 @@ void dma_mem_2_mem_test_case(void)
     DMA_Open(&dma_ctrl1, &dma_cfg1);
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE / 4U);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     /* Clear interrupt flag */
     dma_ctrl1.p_reg->IFCR |= 1U;
@@ -212,7 +212,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
 
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     DMA_Stop(&dma_ctrl1);
     DMA_Close(&dma_ctrl1);
@@ -246,7 +246,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
 
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     /* Clear interrupt flag */
     dma_ctrl1.p_reg->IFCR |= 1U;
@@ -275,7 +275,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
 
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)0x00, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     DMA_Stop(&dma_ctrl1);
     DMA_Close(&dma_ctrl1);
@@ -303,7 +303,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
 
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     DMA_Stop(&dma_ctrl1);
     DMA_Close(&dma_ctrl1);
@@ -355,7 +355,7 @@ void dma_mem_2_mem_interrupt_test_case(void)
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     DMA_Start(&dma_ctrl2, (uint32_t)&src1, (uint32_t)&dest1, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     DMA_Stop(&dma_ctrl1);
     DMA_Close(&dma_ctrl1);
@@ -419,7 +419,7 @@ void dma2_mem_2_mem_test_case(void)
     DMA_Start(&dma_ctrl1, (uint32_t)&src, (uint32_t)&dest, TEST_SIZE);
     DMA_Start(&dma_ctrl2, (uint32_t)&src1, (uint32_t)&dest1, TEST_SIZE);
     
-    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 1U);
+    BSP_Software_Delay(BSP_DELAY_UNIT_MILLISECOND, 10U);
 
     DMA_Stop(&dma_ctrl1);
     DMA_Close(&dma_ctrl1);
