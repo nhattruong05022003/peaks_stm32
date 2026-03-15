@@ -68,8 +68,7 @@ void I2C1_EV_IRQHandler(void)              __attribute__((weak, alias("Default_H
 void I2C1_ER_IRQHandler(void)              __attribute__((weak, alias("Default_Handler")));  // 32
 void I2C2_EV_IRQHandler(void)              __attribute__((weak, alias("Default_Handler")));  // 33
 void I2C2_ER_IRQHandler(void)              __attribute__((weak, alias("Default_Handler")));  // 34
-void SPI_IRQHandler(void)                 __attribute__((weak, alias("Default_Handler")));   // 35
-void SPI_IRQHandler(void)                 __attribute__((weak, alias("Default_Handler")));   // 36
+void SPI_IRQHandler(void)                  __attribute__((weak, alias("Default_Handler")));   // 35, 36
 void USART1_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 37
 void USART2_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 38
 void USART3_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 39
