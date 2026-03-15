@@ -2,6 +2,8 @@
 
 #if (RUN_DMA_TEST_CASE)
 
+extern void abort(void);
+
 #define TEST_SIZE 2048
 
 uint8_t src[TEST_SIZE];

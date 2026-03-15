@@ -2,13 +2,7 @@
 
 #if (RUN_BSP_TEST_CASE)
 
-void abort(void)
-{
-    while(1)
-    {
-        __asm__ volatile("nop");
-    }
-}
+extern void abort(void);
 
 /**********************************************************************************************************************
  * @brief Test case testing IO Port.

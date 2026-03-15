@@ -1,5 +1,13 @@
 #include "main.h"
 
+void abort(void)
+{
+    while(1)
+    {
+        __asm__ volatile("nop");
+    }
+}
+
 #if (RUN_BSP_TEST_CASE)
 extern void bsp_run_test(void);
 #endif
