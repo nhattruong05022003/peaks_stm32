@@ -1060,7 +1060,7 @@ typedef struct SPIx_Type_t
     /* SPI status register (SPI_SR) */
     union
     {
-        const volatile uint32_t SPI_SR;
+        volatile uint32_t SPI_SR;
         struct
         {
             const volatile uint32_t RXNE : 1; /* Receive buffer not empty */
@@ -1075,7 +1075,7 @@ typedef struct SPIx_Type_t
                                                 1: Underrun occurred
                                                 This flag is set by hardware and reset by a software sequence.
                                                 Note: This bit is not used in SPI mode. */
-            const volatile uint32_t CRCERR : 1; /* CRC error flag
+            volatile uint32_t CRCERR : 1; /* CRC error flag
                                                 0: CRC value received matches the SPI_RXCRCR value
                                                 1: CRC value received does not match the SPI_RXCRCR value */
             const volatile uint32_t MODF : 1; /* Mode fault
