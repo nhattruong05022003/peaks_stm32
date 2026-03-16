@@ -2,8 +2,6 @@
 
 #if (RUN_BSP_TEST_CASE)
 
-extern void abort(void);
-
 /**********************************************************************************************************************
  * @brief Test case testing IO Port.
  * Expect: Read / Write GPIO normally.

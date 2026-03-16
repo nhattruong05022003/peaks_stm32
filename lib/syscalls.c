@@ -154,7 +154,13 @@ int _execve(char *name, char **argv, char **env)
 	return -1;
 }
 
-
+void abort(void)
+{
+    while(1)
+    {
+        __asm__ volatile("nop");
+    }
+}
 
 /**
  _sbrk
