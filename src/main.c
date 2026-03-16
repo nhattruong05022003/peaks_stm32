@@ -8,6 +8,10 @@ extern void bsp_run_test(void);
 extern void dma_run_test(void);
 #endif
 
+#if (RUN_SPI_TEST_CASE)
+extern void spi_run_test(void);
+#endif
+
 int main(void) {
 
 #if (RUN_BSP_TEST_CASE)
@@ -16,6 +20,10 @@ int main(void) {
 
 #if (RUN_DMA_TEST_CASE)
     dma_run_test();
+#endif
+
+#if (RUN_SPI_TEST_CASE)
+    spi_run_test();
 #endif
 
     while (1) 
