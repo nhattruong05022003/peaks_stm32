@@ -115,6 +115,9 @@ void SPI_Open(spi_ctrl_t *p_ctrl, const spi_cfg_t *p_cfg)
     /* Enable SPI */
     p_ctrl->p_reg->SPI_CR1_b.SPE = 1U;
 
+    /* Dummy read for data register */
+    (void)p_ctrl->p_reg->SPI_DR;
+
     p_ctrl->callback_status = SPI_CALLBACK_STATUS_NONE;
 
     p_ctrl->open = SPI_OPEN;
