@@ -69,6 +69,9 @@ void DMA_Open(dma_ctrl_t *p_ctrl, const dma_cfg_t *p_cfg)
     /* Set up memory size */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.MSIZE = p_cfg->configuration_b.mem_size;
 
+    /* Set up transfer direction */
+    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.DIR = p_cfg->configuration_b.tranfer_direction;
+
     /* Set up DMA priority */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.PL = p_cfg->configuration_b.channel_priority;
 
@@ -235,6 +238,9 @@ void DMA_Close(dma_ctrl_t *p_ctrl)
 
     /* Clear memory size */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.MSIZE = 0U;
+
+    /* Clear transfer direction */
+    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.DIR = 0U;
 
     /* Clear DMA priority */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.PL = 0U;

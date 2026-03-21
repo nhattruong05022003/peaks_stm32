@@ -2,7 +2,7 @@
 
 #if (RUN_DMA_TEST_CASE)
 
-#define TEST_SIZE 2048
+#define TEST_SIZE 1024U
 
 uint8_t src[TEST_SIZE];
 uint8_t dest[TEST_SIZE];
@@ -55,6 +55,41 @@ dma_cfg_t dma_cfg2 =
 static volatile uint8_t tranfer_irq_flag = 0U;
 static volatile uint8_t half_tranfer_irq_flag = 0U;
 static volatile uint8_t tranfer_error_irq_flag = 0U;
+
+static void dma_set_up_test(void)
+{
+    dma_cfg1.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_PERIPH;
+    dma_cfg1.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_cfg1.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_ENABLE;
+    dma_cfg1.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_cfg1.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_ENABLE;
+    dma_cfg1.configuration_b.mem_size = DMA_MEM_SIZE_8_BITS;
+    dma_cfg1.configuration_b.periph_size = DMA_PERIPH_SIZE_8_BITS;
+    dma_cfg1.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_MEDIUM;
+    dma_cfg1.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_cfg1.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_cfg1.err_ipl = BSP_IRQ_DISABLE;
+    dma_cfg1.channel = 1U;
+    dma_cfg1.unit = DMA_UNIT_1;
+
+    dma_cfg2.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_PERIPH;
+    dma_cfg2.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_cfg2.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_ENABLE;
+    dma_cfg2.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_cfg2.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_ENABLE;
+    dma_cfg2.configuration_b.mem_size = DMA_MEM_SIZE_8_BITS;
+    dma_cfg2.configuration_b.periph_size = DMA_PERIPH_SIZE_8_BITS;
+    dma_cfg2.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_MEDIUM;
+    dma_cfg2.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_cfg2.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_cfg2.err_ipl = BSP_IRQ_DISABLE;
+    dma_cfg2.channel = 4U;
+    dma_cfg2.unit = DMA_UNIT_1;
+    tranfer_irq_flag = 0U;
+    half_tranfer_irq_flag = 0U;
+    tranfer_error_irq_flag = 0U;
+}
+
 void DMA_user_callback(void *p_args)
 {
     dma_ctrl_t *p_ctrl = (dma_ctrl_t *)p_args;
@@ -445,6 +480,7 @@ void dma2_mem_2_mem_test_case(void)
 
 void dma_run_test(void)
 {
+    dma_set_up_test();
     dma_mem_2_mem_test_case();
     dma_mem_2_mem_interrupt_test_case();
 #if (BSP_FEATURE_DMA2_IS_AVAILABLE)
