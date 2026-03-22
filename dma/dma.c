@@ -193,6 +193,9 @@ void DMA_Stop(dma_ctrl_t *p_ctrl)
     ASSERT(p_ctrl);
     uint8_t channel = p_ctrl->p_cfg->channel - 1U;
 
+    /* Disable DMA channel */
+    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 0U;
+
     /* Clear tranfer size */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CNDTRx = 0U;
 
@@ -201,9 +204,6 @@ void DMA_Stop(dma_ctrl_t *p_ctrl)
 
     /* Clear destination address */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CMARx = (uint32_t) 0U;
-
-    /* Disable DMA channel */
-    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 0U;
 }
 
 /**********************************************************************************************************************
