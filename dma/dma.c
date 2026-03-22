@@ -3,7 +3,7 @@
 #define DMA_OPEN (0x00447741U) ///< DMA in ASCII
 
 /* DMA unit array */
-static DMAx_Type * dma_unit_list[] = 
+DMAx_Type * dma_unit_list[] = 
 {
     DMA1,
 #if (BSP_FEATURE_DMA2_IS_AVAILABLE)

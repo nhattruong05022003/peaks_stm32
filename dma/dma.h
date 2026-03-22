@@ -146,6 +146,8 @@ typedef struct st_dma_cfg
     dma_unit_t unit; ///< DMA Unit
 } dma_cfg_t;
 
+extern DMAx_Type * dma_unit_list[];
+
 /**
  * @brief DMA control structure. This struct will be set up by function.
  * Do not manually change the value of this struct.
