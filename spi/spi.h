@@ -2,6 +2,7 @@
 #define _SPI_H_
 
 #include "bsp_api.h"
+#include "dma.h"
 
 /* Bit mask for Overrun error */
 #define SPI_ERROR_OVERRUN_BIT_MASK (1U << 6)
@@ -156,6 +157,8 @@ typedef struct st_spi_cfg
             uint16_t data_frame : 1; ///< Data Frame Format (8 / 16 bits)
             uint16_t crc_en : 1; ///< Hardware CRC enable
             uint16_t slave_select_mode : 1; ///< Slave select mode (manual / auto)
+            uint16_t dma_transmit_en : 1; ///< DMA Transmit enable
+            uint16_t dma_receive_en : 1; ///< DMA Receive enable
         } configuration_b;
     };
     uint16_t direction; ///< SPI direction
@@ -163,6 +166,10 @@ typedef struct st_spi_cfg
     uint8_t receive_ipl; ///< Receive interrupt priority
     uint8_t err_ipl; ///< Error interrupt priority
     spi_unit_t unit; ///< SPI Unit
+    void * p_dma_tx_ctrl; ///< Pointer to DMA TX control struct
+    void * p_dma_tx_cfg; ///< Pointer to DMA TX configuration struct
+    void * p_dma_rx_ctrl; ///< Pointer to DMA RX control struct
+    void * p_dma_rx_cfg; ///< Pointer to DMA RX configuration struct
 } spi_cfg_t;
 
 /**
@@ -182,40 +189,12 @@ typedef struct st_spi_ctrl
     spi_callback_status_t callback_status; ///< The status of callback
 } spi_ctrl_t;
 
-/**********************************************************************************************************************
- * @brief Transmit data with polling mode.
- *
- * @return None
- *********************************************************************************************************************/
-__STATIC_INLINE void SPI_PollingWrite (spi_ctrl_t *p_ctrl, void *data)
-{
-    while(p_ctrl->p_reg->SPI_SR_b.TXE == 0U);
-    if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
-        p_ctrl->p_reg->SPI_DR = *(volatile uint8_t *)data;
-    else
-        p_ctrl->p_reg->SPI_DR = *(volatile uint16_t *)data;
-    /* Dummy read */
-    (void)p_ctrl->p_reg->SPI_DR;
-}
-
-/**********************************************************************************************************************
- * @brief Receive data with polling mode.
- *
- * @return None
- *********************************************************************************************************************/
-__STATIC_INLINE void SPI_PollingRead (spi_ctrl_t *p_ctrl, void *data)
-{
-    while(p_ctrl->p_reg->SPI_SR_b.RXNE == 0U);
-    if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
-        *(volatile uint8_t *)data = p_ctrl->p_reg->SPI_DR;
-    else
-        *(volatile uint16_t *)data = p_ctrl->p_reg->SPI_DR;
-}
-
 void SPI_Open(spi_ctrl_t *p_ctrl, const spi_cfg_t *p_cfg);
 void SPI_CallbackSet(spi_ctrl_t *p_ctrl, void (*p_callback)(void *p_args));
 void SPI_Write(spi_ctrl_t *p_ctrl, void * p_src, uint16_t size);
+void SPI_PollingWrite (spi_ctrl_t *p_ctrl, void *data);
 void SPI_Read(spi_ctrl_t *p_ctrl, void * p_dest, uint16_t size);
+void SPI_PollingRead (spi_ctrl_t *p_ctrl, void *data);
 void SPI_Close(spi_ctrl_t *p_ctrl);
 
 #endif

@@ -108,6 +108,22 @@ void SPI_Open(spi_ctrl_t *p_ctrl, const spi_cfg_t *p_cfg)
     }
 
     /* Set up DMA for SPI */
+    /* When using DMA it's recommended to use IRQ of DMA instead of SPI */
+    if(p_ctrl->p_cfg->configuration_b.dma_transmit_en)
+    {
+        ASSERT(p_ctrl->p_cfg->p_dma_tx_cfg);
+        ASSERT(p_ctrl->p_cfg->p_dma_tx_ctrl);
+
+        DMA_Open(p_ctrl->p_cfg->p_dma_tx_ctrl, p_ctrl->p_cfg->p_dma_tx_cfg);
+    }
+
+    if(p_ctrl->p_cfg->configuration_b.dma_receive_en)
+    {
+        ASSERT(p_ctrl->p_cfg->p_dma_rx_cfg);
+        ASSERT(p_ctrl->p_cfg->p_dma_rx_ctrl);
+
+        DMA_Open(p_ctrl->p_cfg->p_dma_rx_ctrl, p_ctrl->p_cfg->p_dma_rx_cfg);
+    }
 
     /* Config mode for SPI */
     p_ctrl->p_reg->SPI_CR1_b.MSTR = p_cfg->configuration_b.mode;
@@ -154,10 +170,31 @@ void SPI_Write(spi_ctrl_t *p_ctrl, void * p_src, uint16_t size)
     ASSERT(p_ctrl->open == SPI_OPEN);
     ASSERT(p_src);
 
-    p_ctrl->p_src = p_src;
-    p_ctrl->write_size = size;
+    if(p_ctrl->p_cfg->configuration_b.dma_transmit_en)
+    {
+        DMAx_Type *dma_unit = dma_unit_list[(uint8_t)((dma_cfg_t *)(p_ctrl->p_cfg->p_dma_tx_cfg))->unit];
+        uint8_t channel = ((dma_cfg_t *)(p_ctrl->p_cfg->p_dma_tx_cfg))->channel - 1U;
 
-    p_ctrl->p_reg->SPI_CR2_b.TXEIE = 1U;
+        /* Set up tranfer size */
+        dma_unit->DMA_Channelx_Reg[channel].CNDTRx = size;
+
+        /* Set up source address */
+        dma_unit->DMA_Channelx_Reg[channel].CPARx = (uint32_t) &(p_ctrl->p_reg->SPI_DR);
+
+        /* Set up destination address */
+        dma_unit->DMA_Channelx_Reg[channel].CMARx = (uint32_t) p_src;
+
+        p_ctrl->p_reg->SPI_CR2_b.TXDMAEN = 1U;
+
+        dma_unit->DMA_Channelx_Reg[channel].CCRx_b.EN = 1U;
+    }
+    else
+    {
+        p_ctrl->p_src = p_src;
+        p_ctrl->write_size = size;
+
+        p_ctrl->p_reg->SPI_CR2_b.TXEIE = 1U;
+    }
 }
 
 /**********************************************************************************************************************
@@ -175,8 +212,57 @@ void SPI_Read(spi_ctrl_t *p_ctrl, void * p_dest, uint16_t size)
     ASSERT(p_ctrl->open == SPI_OPEN);
     ASSERT(p_dest);
 
-    p_ctrl->p_dest = p_dest;
-    p_ctrl->read_size = size;
+    if(p_ctrl->p_cfg->configuration_b.dma_receive_en)
+    {
+        DMAx_Type *dma_unit = dma_unit_list[(uint8_t)((dma_cfg_t *)(p_ctrl->p_cfg->p_dma_rx_cfg))->unit];
+        uint8_t channel = ((dma_cfg_t *)(p_ctrl->p_cfg->p_dma_rx_cfg))->channel - 1U;
+
+        /* Set up tranfer size */
+        dma_unit->DMA_Channelx_Reg[channel].CNDTRx = size;
+
+        /* Set up source address */
+        dma_unit->DMA_Channelx_Reg[channel].CPARx = (uint32_t) &(p_ctrl->p_reg->SPI_DR);
+
+        /* Set up destination address */
+        dma_unit->DMA_Channelx_Reg[channel].CMARx = (uint32_t) p_dest;
+
+        p_ctrl->p_reg->SPI_CR2_b.RXDMAEN = 1U;
+
+        dma_unit->DMA_Channelx_Reg[channel].CCRx_b.EN = 1U;
+    }
+    else
+    {
+        p_ctrl->p_dest = p_dest;
+        p_ctrl->read_size = size;
+    }
+}
+
+/**********************************************************************************************************************
+ * @brief Transmit data with polling mode.
+ *
+ * @return None
+ *********************************************************************************************************************/
+void SPI_PollingWrite (spi_ctrl_t *p_ctrl, void *data)
+{
+    while(p_ctrl->p_reg->SPI_SR_b.TXE == 0U);
+    if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
+        p_ctrl->p_reg->SPI_DR = *(volatile uint8_t *)data;
+    else
+        p_ctrl->p_reg->SPI_DR = *(volatile uint16_t *)data;
+}
+
+/**********************************************************************************************************************
+ * @brief Receive data with polling mode.
+ *
+ * @return None
+ *********************************************************************************************************************/
+void SPI_PollingRead (spi_ctrl_t *p_ctrl, void *data)
+{
+    while(p_ctrl->p_reg->SPI_SR_b.RXNE == 0U);
+    if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
+        *(volatile uint8_t *)data = p_ctrl->p_reg->SPI_DR;
+    else
+        *(volatile uint16_t *)data = p_ctrl->p_reg->SPI_DR;
 }
 
 /**********************************************************************************************************************
@@ -256,6 +342,25 @@ void SPI_Close(spi_ctrl_t *p_ctrl)
     }
 
     /* Clear DMA for SPI */
+    if(p_ctrl->p_cfg->configuration_b.dma_transmit_en)
+    {
+        ASSERT(p_ctrl->p_cfg->p_dma_tx_ctrl);
+
+        p_ctrl->p_reg->SPI_CR2_b.TXDMAEN = 0U;
+
+        DMA_Stop(p_ctrl->p_cfg->p_dma_tx_ctrl);
+        DMA_Close(p_ctrl->p_cfg->p_dma_tx_ctrl);
+    }
+
+    if(p_ctrl->p_cfg->configuration_b.dma_receive_en)
+    {
+        ASSERT(p_ctrl->p_cfg->p_dma_rx_ctrl);
+
+        p_ctrl->p_reg->SPI_CR2_b.RXDMAEN = 0U;
+
+        DMA_Stop(p_ctrl->p_cfg->p_dma_rx_ctrl);
+        DMA_Close(p_ctrl->p_cfg->p_dma_rx_ctrl);
+    }
 
     /* Clear mode for SPI */
     p_ctrl->p_reg->SPI_CR1_b.MSTR = 0x00U;
@@ -323,7 +428,6 @@ static void spi_txi_isr(void * p_ctrl_arg)
 
     if(p_ctrl->write_size != 0U)
     {
-
         if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
         {
             p_ctrl->p_reg->SPI_DR = *(volatile uint8_t *) p_ctrl->p_src;
