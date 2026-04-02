@@ -193,6 +193,9 @@ void DMA_Stop(dma_ctrl_t *p_ctrl)
     ASSERT(p_ctrl);
     uint8_t channel = p_ctrl->p_cfg->channel - 1U;
 
+    /* Clear DMA channel flag */
+    p_ctrl->p_reg->IFCR |= (0x0FU << (channel * 4U));
+
     /* Disable DMA channel */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 0U;
 
