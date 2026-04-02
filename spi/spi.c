@@ -283,37 +283,6 @@ void SPI_Close(spi_ctrl_t *p_ctrl)
     /* Dummy read for Data register */
     (void)p_ctrl->p_reg->SPI_DR;
 
-    /* Disable SPI */
-    p_ctrl->p_reg->SPI_CR1_b.SPE = 0U;
-
-    /* Clear baud rate */
-    p_ctrl->p_reg->SPI_CR1_b.BR = 0x00U;
-
-    /* Clear CPOL and CPHA */
-    p_ctrl->p_reg->SPI_CR1 &= ~(0x03U);
-
-    /* Clear data frame */
-    p_ctrl->p_reg->SPI_CR1_b.DFF = 0x00U;
-
-    /* Clear frame */
-    p_ctrl->p_reg->SPI_CR1_b.LSBFIRST = 0x00U;
-
-    /* Clear hardware CRC */
-    p_ctrl->p_reg->SPI_CR1_b.CRCEN = SPI_HARDWARE_CRC_DISABLE;
-
-    /* Clear direction (Clear bit 10, 14, 15)*/
-    p_ctrl->p_reg->SPI_CR1 &= ~((1U << 15) | (1U << 14) | (1U << 10));
-
-    /* Clear software slave management */
-    p_ctrl->p_reg->SPI_CR1_b.SSM = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
-    p_ctrl->p_reg->SPI_CR1_b.SSI = 0x00U;
-
-    /* Clear slave select mode */
-    p_ctrl->p_reg->SPI_CR2_b.SSOE = 0x00U;
-
-    /* Clear CRC polynomial */
-    p_ctrl->p_reg->SPI_CRCPR = 0x07U;
-
     /* Clear transmit interrupt */
     if(p_cfg->transmit_ipl != BSP_IRQ_DISABLE)
     {
@@ -361,6 +330,37 @@ void SPI_Close(spi_ctrl_t *p_ctrl)
         DMA_Stop(p_ctrl->p_cfg->p_dma_rx_ctrl);
         DMA_Close(p_ctrl->p_cfg->p_dma_rx_ctrl);
     }
+
+    /* Disable SPI */
+    p_ctrl->p_reg->SPI_CR1_b.SPE = 0U;
+
+    /* Clear baud rate */
+    p_ctrl->p_reg->SPI_CR1_b.BR = 0x00U;
+
+    /* Clear CPOL and CPHA */
+    p_ctrl->p_reg->SPI_CR1 &= ~(0x03U);
+
+    /* Clear data frame */
+    p_ctrl->p_reg->SPI_CR1_b.DFF = 0x00U;
+
+    /* Clear frame */
+    p_ctrl->p_reg->SPI_CR1_b.LSBFIRST = 0x00U;
+
+    /* Clear hardware CRC */
+    p_ctrl->p_reg->SPI_CR1_b.CRCEN = SPI_HARDWARE_CRC_DISABLE;
+
+    /* Clear direction (Clear bit 10, 14, 15)*/
+    p_ctrl->p_reg->SPI_CR1 &= ~((1U << 15) | (1U << 14) | (1U << 10));
+
+    /* Clear software slave management */
+    p_ctrl->p_reg->SPI_CR1_b.SSM = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    p_ctrl->p_reg->SPI_CR1_b.SSI = 0x00U;
+
+    /* Clear slave select mode */
+    p_ctrl->p_reg->SPI_CR2_b.SSOE = 0x00U;
+
+    /* Clear CRC polynomial */
+    p_ctrl->p_reg->SPI_CRCPR = 0x07U;
 
     /* Clear mode for SPI */
     p_ctrl->p_reg->SPI_CR1_b.MSTR = 0x00U;
