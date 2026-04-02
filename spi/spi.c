@@ -280,6 +280,12 @@ void SPI_Close(spi_ctrl_t *p_ctrl)
 
     const spi_cfg_t *p_cfg = p_ctrl->p_cfg;
 
+    /* Disable SPI */
+    p_ctrl->p_reg->SPI_CR1_b.SPE = 0U;
+
+    /* Clear CRC error flag */
+    p_ctrl->p_reg->SPI_SR_b.CRCERR = 0U;
+
     /* Dummy read for Data register */
     (void)p_ctrl->p_reg->SPI_DR;
 
@@ -330,9 +336,6 @@ void SPI_Close(spi_ctrl_t *p_ctrl)
         DMA_Stop(p_ctrl->p_cfg->p_dma_rx_ctrl);
         DMA_Close(p_ctrl->p_cfg->p_dma_rx_ctrl);
     }
-
-    /* Disable SPI */
-    p_ctrl->p_reg->SPI_CR1_b.SPE = 0U;
 
     /* Clear baud rate */
     p_ctrl->p_reg->SPI_CR1_b.BR = 0x00U;
