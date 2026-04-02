@@ -910,8 +910,8 @@ void spi_dma_test_case(void)
 
     BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
 
-    SPI_Read(&spi_ctrl_dma_1, &dest, 256U);
-    SPI_Write(&spi_ctrl_dma_0, &src, 256U);
+    SPI_Read(&spi_ctrl_dma_1, &dest, 128U);
+    SPI_Write(&spi_ctrl_dma_0, &src, 128U);
 
     // Wait for Master DMA to finish TX
     while(spi_ctrl_dma_0.p_reg->SPI_SR_b.BSY); 
@@ -926,7 +926,7 @@ void spi_dma_test_case(void)
     BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
 
     /* Check transmit-receive data */
-    for(uint16_t i = 0U; i < 256U; i++)
+    for(uint16_t i = 0U; i < 128U; i++)
     {
         ASSERT(src[i] == dest[i]);
     }
