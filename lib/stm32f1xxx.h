@@ -936,4 +936,311 @@ typedef struct DMAx_Type_t
 #define DMA1 ((DMAx_Type *)DMA1_BASE)
 #define DMA2 ((DMAx_Type *)DMA2_BASE)
 
+/**********************************************************************************************************************
+ *                                                      SPI
+ **********************************************************************************************************************/
+
+typedef struct SPIx_Type_t
+{
+    /* SPI control register 1 (SPI_CR1) (not used in I2S mode) */
+    union
+    {
+        volatile uint32_t SPI_CR1;
+        struct
+        {
+            volatile uint32_t CPHA : 1; /* Clock phase
+                                        0: The first clock transition is the first data capture edge
+                                        1: The second clock transition is the first data capture edge */
+            volatile uint32_t CPOL : 1; /* Clock polarity
+                                        0: CK to 0 when idle
+                                        1: CK to 1 when idle */
+            volatile uint32_t MSTR : 1; /* Master selection
+                                        0: Slave configuration
+                                        1: Master configuration */
+            volatile uint32_t BR : 3; /* Baud rate control */
+            volatile uint32_t SPE : 1; /* SPI enable 
+                                        0: Peripheral disabled
+                                        1: Peripheral enabled */
+            volatile uint32_t LSBFIRST : 1; /* Frame format
+                                            0: MSB transmitted first
+                                            1: LSB transmitted first */
+            volatile uint32_t SSI : 1; /* Internal slave select
+                                        This bit has an effect only when the SSM bit is set. 
+                                        The value of this bit is forced onto the
+                                        NSS pin and the IO value of the NSS pin is ignored. */
+            volatile uint32_t SSM : 1; /* Software slave management
+                                        When the SSM bit is set, the NSS pin input is
+                                        replaced with the value from the SSI bit.
+                                        0: Software slave management disabled
+                                        1: Software slave management enabled */
+            volatile uint32_t RXONLY : 1; /* Receive only
+                                            This bit combined with the BIDImode bit selects the 
+                                            direction of transfer in 2-line
+                                            unidirectional mode. This bit is also useful in a 
+                                            multislave system in which this particular
+                                            slave is not accessed, the output from the accessed 
+                                            slave is not corrupted.
+                                            0: Full duplex (Transmit and receive)
+                                            1: Output disabled (Receive-only mode) */
+            volatile uint32_t DFF : 1; /* Data frame format
+                                        0: 8-bit data frame format is 
+                                        selected for transmission/reception
+                                        1: 16-bit data frame format is 
+                                        selected for transmission/reception 
+                                        This bit should be written only when SPI is 
+                                        disabled (SPE = ‘0’) for correct operation */
+            volatile uint32_t CRCNEXT : 1; /* CRC transfer next 
+                                            0: Data phase (no CRC phase)
+                                            1: Next transfer is CRC (CRC phase) 
+                                            When the SPI is configured in full duplex or transmitter 
+                                            only modes, CRCNEXT must be written as soon as the last 
+                                            data is written to the SPI_DR register.
+                                            When the SPI is configured in receiver only mode, CRCNEXT 
+                                            must be set after the second last data reception. */
+            volatile uint32_t CRCEN : 1; /* Hardware CRC calculation enable
+                                            0: CRC calculation disabled
+                                            1: CRC calculation enabled 
+                                            This bit should be written only when SPI is disabled 
+                                            (SPE = ‘0’) for correct operation */
+            volatile uint32_t BIDIOE : 1; /* Output enable in bidirectional mode
+                                            This bit combined with the BIDImode bit selects the 
+                                            direction of transfer in bidirectional mode
+                                            0: Output disabled (receive-only mode)
+                                            1: Output enabled (transmit-only mode) 
+                                            In master mode, the MOSI pin is used while the 
+                                            MISO pin is used in slave mode.*/
+            volatile uint32_t BIDIMODE : 1; /* Bidirectional data mode enable
+                                            0: 2-line unidirectional data mode selected
+                                            1: 1-line bidirectional data mode selected */
+            const volatile uint32_t : 16;
+        }SPI_CR1_b;
+    };
+
+    /* SPI control register 2 (SPI_CR2) */
+    union
+    {
+        volatile uint32_t SPI_CR2;
+        struct
+        {
+            volatile uint32_t RXDMAEN : 1; /* Rx buffer DMA enable 
+                                            When this bit is set, the DMA request is made 
+                                            whenever the RXNE flag is set.
+                                            0: Rx buffer DMA disabled
+                                            1: Rx buffer DMA enabled */
+            volatile uint32_t TXDMAEN : 1; /* Tx buffer DMA enable 
+                                            When this bit is set, the DMA request is made 
+                                            whenever the RXNE flag is set.
+                                            0: Rx buffer DMA disabled
+                                            1: Rx buffer DMA enabled */
+            volatile uint32_t SSOE : 1; /*  SS output enable
+                                            0: SS output is disabled in master mode and the cell 
+                                            can work in multimaster configuration
+                                            1: SS output is enabled in master mode and when the cell is enabled. 
+                                            The cell cannot work in a multimaster environment */
+            const volatile uint32_t : 2;
+            volatile uint32_t ERRIE : 1; /* Error interrupt enable
+                                            This bit controls the generation of an interrupt when an 
+                                            error condition occurs (CRCERR, OVR, MODF in SPI mode and UDR, 
+                                            OVR in I2S mode).
+                                            0: Error interrupt is masked
+                                            1: Error interrupt is enabled */
+            volatile uint32_t RXNEIE : 1; /* RX buffer not empty interrupt enable
+                                            0: RXNE interrupt masked
+                                            1: RXNE interrupt not masked. Used to generate 
+                                            an interrupt request when the RXNE flag is
+                                            set. */
+            volatile uint32_t TXEIE : 1; /* Tx buffer empty interrupt enable
+                                            0: TXE interrupt masked
+                                            1: TXE interrupt not masked. Used to generate 
+                                            an interrupt request when the TXE flag is set. */
+            const volatile uint32_t : 24;
+        } SPI_CR2_b;
+    };
+
+    /* SPI status register (SPI_SR) */
+    union
+    {
+        volatile uint32_t SPI_SR;
+        struct
+        {
+            const volatile uint32_t RXNE : 1; /* Receive buffer not empty */
+            const volatile uint32_t TXE : 1; /* Transmit buffer empty */
+            const volatile uint32_t CHSIDE : 1; /* CHSIDE: Channel side
+                                                0: Channel Left has to be transmitted or has been received
+                                                1: Channel Right has to be transmitted or has been received
+                                                Note: This bit is not used for SPI mode and is 
+                                                meaningless in PCM mode */
+            const volatile uint32_t UDR : 1; /* Underrun flag
+                                                0: No underrun occurred
+                                                1: Underrun occurred
+                                                This flag is set by hardware and reset by a software sequence.
+                                                Note: This bit is not used in SPI mode. */
+            volatile uint32_t CRCERR : 1; /* CRC error flag
+                                                0: CRC value received matches the SPI_RXCRCR value
+                                                1: CRC value received does not match the SPI_RXCRCR value */
+            const volatile uint32_t MODF : 1; /* Mode fault
+                                                0: No mode fault occurred
+                                                1: Mode fault occurred
+                                                This flag is set by hardware and reset by a software sequence.  */
+            const volatile uint32_t OVR : 1; /* Overrun flag
+                                                0: No overrun occurred
+                                                1: Overrun occurred
+                                                This flag is set by hardware and reset by a software sequence */
+            const volatile uint32_t BSY : 1; /* Busy flag
+                                                0: SPI (or I2S) not busy
+                                                1: SPI (or I2S) is busy in communication or Tx buffer is not empty
+                                                This flag is set and cleared by hardware. */
+            const volatile uint32_t : 24;
+        } SPI_SR_b;
+    };
+
+    /* SPI data register (SPI_DR) */
+    union
+    {
+        volatile uint32_t SPI_DR;
+        struct
+        {
+            volatile uint32_t DR : 16; /* Data register
+                                        Data received or to be transmitted.
+                                        The data register is split into 2 buffers - one for writing 
+                                        (Transmit Buffer) and another one for reading (Receive buffer). 
+                                        A write to the data register will write into the Tx buffer and a read
+                                        from the data register will return the value held in the Rx buffer. */
+            const volatile uint32_t : 16;
+        } SPI_DR_b;
+    };
+
+    /* SPI CRC polynomial register (SPI_CRCPR) (not used in I2S mode) */
+    union
+    {
+        volatile uint32_t SPI_CRCPR;
+        struct
+        {
+            volatile uint32_t CRCPOLY : 16;  /* CRC polynomial register
+                                                This register contains the polynomial for the CRC calculation.
+                                                The CRC polynomial (0007h) is the reset value of this register. Another polynomial can be
+                                                configured as required */
+            const volatile uint32_t : 16;
+        } SPI_CRCPR_b;
+    };
+
+    /* SPI RX CRC register (SPI_RXCRCR) (not used in I2S mode) */
+    union
+    {
+        const volatile uint32_t SPI_RXCRCR;
+        struct
+        {
+            const volatile uint32_t RXCRC : 16;  /* Rx CRC register
+                                            When CRC calculation is enabled, the RxCRC[15:0] bits contain 
+                                            the computed CRC value of the subsequently received bytes. This 
+                                            register is reset when the CRCEN bit in SPI_CR1 register is written 
+                                            to 1. The CRC is calculated serially using the polynomial programmed in
+                                            the SPI_CRCPR register.
+                                            Only the 8 LSB bits are considered when the data frame format is 
+                                            set to be 8-bit data (DFF bit of SPI_CR1 is cleared). CRC calculation 
+                                            is done based on any CRC8 standard.
+                                            The entire 16-bits of this register are considered when a 16-bit data 
+                                            frame format is selected (DFF bit of the SPI_CR1 register is set). 
+                                            CRC calculation is done based on any CRC16 standard.
+                                            Note: A read to this register when the BSY Flag is set could return 
+                                            an incorrect value. */
+            const volatile uint32_t : 16;
+        } SPI_RXCRCR_b;
+    };
+
+    /* SPI TX CRC register (SPI_TXCRCR) (not used in I2S mode) */
+    union
+    {
+        const volatile uint32_t SPI_TXCRCR;
+        struct
+        {
+            const volatile uint32_t TXCRC : 16;    /* Tx CRC register
+                                                When CRC calculation is enabled, the TxCRC[7:0] bits contain 
+                                                the computed CRC value of the subsequently transmitted bytes. 
+                                                This register is reset when the CRCEN bit of SPI_CR1 is written 
+                                                to 1. The CRC is calculated serially using the polynomial programmed 
+                                                in the SPI_CRCPR register.
+                                                Only the 8 LSB bits are considered when the data frame format is set 
+                                                to be 8-bit data (DFF bit of SPI_CR1 is cleared). CRC calculation is 
+                                                done based on any CRC8 standard.
+                                                The entire 16-bits of this register are considered when a 16-bit data 
+                                                frame format is selected (DFF bit of the SPI_CR1 register is set). 
+                                                CRC calculation is done based on any CRC16 standard.
+                                                Note: A read to this register when the BSY flag is set could return 
+                                                an incorrect value. */
+            const volatile uint32_t : 16;
+        } SPI_TXCRCR_b;
+    };
+
+    /* SPI_I2S configuration register (SPI_I2SCFGR) */
+    union
+    {
+        volatile uint32_t SPI_I2SCFGR;
+        struct
+        {
+            volatile uint32_t CHLEN : 1; /* Channel length (number of bits per audio channel)
+                                            0: 16-bit wide
+                                            1: 32-bit wide
+                                            The bit write operation has a meaning only if DATLEN = 00 
+                                            otherwise the channel length is fixed to
+                                            32-bit by hardware whatever the value filled in. */
+            volatile uint32_t DATLEN : 2; /* Data length to be transferred
+                                            00: 16-bit data length
+                                            01: 24-bit data length
+                                            10: 32-bit data length
+                                            11: Not allowed */
+            volatile uint32_t CKPOL : 1; /* Steady state clock polarity
+                                            0: I2S clock steady state is low level
+                                            1: I2S clock steady state is high level */
+            volatile uint32_t I2SSTD : 2; /* I2S standard selection
+                                            00: I2S Philips standard.
+                                            01: MSB justified standard (left justified)
+                                            10: LSB justified standard (right justified)
+                                            11: PCM standard */
+            const volatile uint32_t : 1;
+            volatile uint32_t PCMSYNC : 1; /* PCM frame synchronization
+                                            0: Short frame synchronization
+                                            1: Long frame synchronization
+                                            Note: This bit has a meaning only if I2SSTD = 11 (PCM standard is used) */
+            volatile uint32_t I2SCFG : 2; /* I2S configuration mode
+                                            00: Slave - transmit
+                                            01: Slave - receive
+                                            10: Master - transmit
+                                            11: Master - receive */
+            volatile uint32_t I2SE : 1; /* I2S Enable
+                                            0: I2S peripheral is disabled
+                                            1: I2S peripheral is enabled */
+            volatile uint32_t I2SMOD : 1; /* I2SMOD: I2S mode selection
+                                            0: SPI mode is selected
+                                            1: I2S mode is selecte */
+            const volatile uint32_t : 20;
+        }SPI_I2SCFGR_b;
+    };
+
+    /*  SPI_I2S prescaler register (SPI_I2SPR) */
+    union
+    {
+        volatile uint32_t SPI_I2SPR;
+        struct
+        {
+            volatile uint32_t I2SDIV : 8; /*  I2S Linear prescaler */
+            volatile uint32_t ODD : 1; /* Odd factor for the prescaler
+                                        0: real divider value is = I2SDIV *2
+                                        1: real divider value is = (I2SDIV * 2)+1 */
+            volatile uint32_t MCKOE : 1; /* Master clock output enable
+                                            0: Master clock output is disabled
+                                            1: Master clock output is enabled */
+            const volatile uint32_t : 12;
+        }SPI_I2SPR_b;
+    };
+} SPIx_Type;
+
+#define SPI1_BASE        (0x40013000U)
+#define SPI2_BASE        (0x40003800U)
+#define SPI3_BASE        (0x40003C00U)
+
+#define SPI1 ((SPIx_Type *)SPI1_BASE)
+#define SPI2 ((SPIx_Type *)SPI2_BASE)
+#define SPI3 ((SPIx_Type *)SPI3_BASE)
+
 #endif

@@ -68,8 +68,7 @@ void I2C1_EV_IRQHandler(void)              __attribute__((weak, alias("Default_H
 void I2C1_ER_IRQHandler(void)              __attribute__((weak, alias("Default_Handler")));  // 32
 void I2C2_EV_IRQHandler(void)              __attribute__((weak, alias("Default_Handler")));  // 33
 void I2C2_ER_IRQHandler(void)              __attribute__((weak, alias("Default_Handler")));  // 34
-void SPI1_IRQHandler(void)                 __attribute__((weak, alias("Default_Handler")));  // 35
-void SPI2_IRQHandler(void)                 __attribute__((weak, alias("Default_Handler")));  // 36
+void SPI_IRQHandler(void)                  __attribute__((weak, alias("Default_Handler")));   // 35, 36
 void USART1_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 37
 void USART2_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 38
 void USART3_IRQHandler(void)               __attribute__((weak, alias("Default_Handler")));  // 39
@@ -144,8 +143,8 @@ uint32_t irq_vectors[] __attribute__((section(".irq_vector"))) =
     (uint32_t)&I2C1_ER_IRQHandler,      // 32
     (uint32_t)&I2C2_EV_IRQHandler,      // 33
     (uint32_t)&I2C2_ER_IRQHandler,      // 34
-    (uint32_t)&SPI1_IRQHandler,         // 35
-    (uint32_t)&SPI2_IRQHandler,         // 36
+    (uint32_t)&SPI_IRQHandler,          // 35
+    (uint32_t)&SPI_IRQHandler,          // 36
     (uint32_t)&USART1_IRQHandler,       // 37
     (uint32_t)&USART2_IRQHandler,       // 38
     (uint32_t)&USART3_IRQHandler,       // 39

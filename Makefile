@@ -23,14 +23,19 @@ endif
 DMA_DIR=dma
 DMA_TEST_DIR=dma/!test
 
+SPI_DIR=spi
+SPI_TEST_DIR=spi/!test
+
 INCLUDE= -I$(BSP_DIR) -I$(BSP_ALL_DIR) -I$(BSP_TEST_DIR) -I$(BSP_DEVICE_DIR) -I$(BSP_SPECIFIC_DEVICE_DIR) -I$(LIB_DIR) -I$(SRC_DIR) \
-			-I$(DMA_DIR) -I$(DMA_TEST_DIR)
+			-I$(DMA_DIR) -I$(DMA_TEST_DIR) \
+			-I$(SPI_DIR) -I$(SPI_TEST_DIR)
 
 OUTPUT_DIR=Debug
 
 # List all directories containing source files
 SRC_DIRS = . $(BSP_DIR) $(BSP_ALL_DIR) $(BSP_TEST_DIR) $(BSP_DEVICE_DIR) $(BSP_SPECIFIC_DEVICE_DIR) $(LIB_DIR) $(SRC_DIR) \
-				$(DMA_DIR) $(DMA_TEST_DIR)
+				$(DMA_DIR) $(DMA_TEST_DIR) \
+				$(SPI_DIR) $(SPI_TEST_DIR)
 vpath %.c $(SRC_DIRS)
 
 # Find all .c files in those directories

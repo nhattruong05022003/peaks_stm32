@@ -3,7 +3,7 @@
 #define DMA_OPEN (0x00447741U) ///< DMA in ASCII
 
 /* DMA unit array */
-static DMAx_Type * dma_unit_list[] = 
+DMAx_Type * dma_unit_list[] = 
 {
     DMA1,
 #if (BSP_FEATURE_DMA2_IS_AVAILABLE)
@@ -68,6 +68,9 @@ void DMA_Open(dma_ctrl_t *p_ctrl, const dma_cfg_t *p_cfg)
 
     /* Set up memory size */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.MSIZE = p_cfg->configuration_b.mem_size;
+
+    /* Set up transfer direction */
+    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.DIR = p_cfg->configuration_b.tranfer_direction;
 
     /* Set up DMA priority */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.PL = p_cfg->configuration_b.channel_priority;
@@ -190,6 +193,12 @@ void DMA_Stop(dma_ctrl_t *p_ctrl)
     ASSERT(p_ctrl);
     uint8_t channel = p_ctrl->p_cfg->channel - 1U;
 
+    /* Clear DMA channel flag */
+    p_ctrl->p_reg->IFCR |= (0x0FU << (channel * 4U));
+
+    /* Disable DMA channel */
+    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 0U;
+
     /* Clear tranfer size */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CNDTRx = 0U;
 
@@ -198,9 +207,6 @@ void DMA_Stop(dma_ctrl_t *p_ctrl)
 
     /* Clear destination address */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CMARx = (uint32_t) 0U;
-
-    /* Disable DMA channel */
-    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.EN = 0U;
 }
 
 /**********************************************************************************************************************
@@ -235,6 +241,9 @@ void DMA_Close(dma_ctrl_t *p_ctrl)
 
     /* Clear memory size */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.MSIZE = 0U;
+
+    /* Clear transfer direction */
+    p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.DIR = 0U;
 
     /* Clear DMA priority */
     p_ctrl->p_reg->DMA_Channelx_Reg[channel].CCRx_b.PL = 0U;

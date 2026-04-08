@@ -2,14 +2,6 @@
 
 #if (RUN_BSP_TEST_CASE)
 
-void abort(void)
-{
-    while(1)
-    {
-        __asm__ volatile("nop");
-    }
-}
-
 /**********************************************************************************************************************
  * @brief Test case testing IO Port.
  * Expect: Read / Write GPIO normally.

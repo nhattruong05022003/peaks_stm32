@@ -22,6 +22,7 @@ char **environ = __env;
 /* Functions */
 void initialise_monitor_handles()
 {
+
 }
 
 int _getpid(void)
@@ -40,7 +41,11 @@ int _kill(int pid, int sig)
 void _exit (int status)
 {
 	_kill(status, -1);
-	while (1) {}		/* Make sure we hang here */
+	/* Make sure we hang here */
+	while (1) 
+	{
+
+	}
 }
 
 __attribute__((weak)) int _read(int file, char *ptr, int len)
@@ -154,7 +159,13 @@ int _execve(char *name, char **argv, char **env)
 	return -1;
 }
 
-
+void abort(void)
+{
+    while(1)
+    {
+        __asm__ volatile("nop");
+    }
+}
 
 /**
  _sbrk
