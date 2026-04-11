@@ -1243,4 +1243,472 @@ typedef struct SPIx_Type_t
 #define SPI2 ((SPIx_Type *)SPI2_BASE)
 #define SPI3 ((SPIx_Type *)SPI3_BASE)
 
+/**********************************************************************************************************************
+ *                                                      I2C
+ **********************************************************************************************************************/
+
+typedef struct I2Cx_Type_t
+{
+    /* I2C Control register 1 (I2C_CR1) */
+    union
+    {
+        volatile uint16_t I2C_CR1;
+        struct
+        {
+            volatile uint16_t PE : 1; /* PE: Peripheral enable
+                                         0: Peripheral disable
+                                         1: Peripheral enable */
+            volatile uint16_t SMBUS : 1; /* SMBus mode
+                                            0: I2C mode
+                                            1: SMBus mode */
+            const volatile uint16_t : 1;
+            volatile uint16_t SMBTYPE : 1; /* SMBus type
+                                              0: SMBus Device
+                                              1: SMBus Host */
+            volatile uint16_t ENARP : 1; /* ARP enable
+                                            0: ARP disable
+                                            1: ARP enable
+                                            SMBus Device default address recognized if SMBTYPE=0
+                                            SMBus Host address recognized if SMBTYPE=1 */
+            volatile uint16_t ENPEC : 1; /* PEC enable
+                                            0: PEC calculation disabled
+                                            1: PEC calculation enabled */
+            volatile uint16_t ENGC : 1;  /* General call enable
+                                            0: General call disabled. Address 00h is NACKed.
+                                            1: General call enabled. Address 00h is ACKed. */
+            volatile uint16_t NOSTRETCH : 1; /* Clock stretching disable (Slave mode)
+                                                This bit is used to disable clock stretching in 
+                                                slave mode when ADDR or BTF flag is set, until
+                                                it is reset by software.
+                                                0: Clock stretching enabled
+                                                1: Clock stretching disabled */
+            volatile uint16_t START : 1; /* Start generation
+                                            This bit is set and cleared by software and cleared 
+                                            by hardware when start is sent or PE=0.
+                                            In Master Mode:
+                                            0: No Start generation
+                                            1: Repeated start generation
+                                            In Slave mode:
+                                            0: No Start generation
+                                            1: Start generation when the bus is free */
+            volatile uint16_t STOP : 1;  /* The bit is set and cleared by software, cleared by hardware when a Stop condition is
+                                            detected, set by hardware when a timeout error is detected.
+                                            In Master Mode:
+                                            0: No Stop generation.
+                                            1: Stop generation after the current byte transfer 
+                                            or after the current Start condition is sent.
+                                            In Slave mode:
+                                            0: No Stop generation.
+                                            1: Release the SCL and SDA lines after the current byte transfer. */
+            volatile uint16_t ACK : 1;   /* Acknowledge enable
+                                            This bit is set and cleared by software and 
+                                            cleared by hardware when PE=0.
+                                            0: No acknowledge returned
+                                            1: Acknowledge returned after a byte is 
+                                            received (matched address or data) */
+            volatile uint16_t POS : 1;   /* Acknowledge/PEC Position (for data reception)
+                                            This bit is set and cleared by software and 
+                                            cleared by hardware when PE=0.
+                                            0: ACK bit controls the (N)ACK of the 
+                                            current byte being received in the shift register. The
+                                            PEC bit indicates that current byte in shift register 
+                                            is a PEC.
+                                            1: ACK bit controls the (N)ACK of the next 
+                                            byte which will be received in the shift register.
+                                            The PEC bit indicates that the next byte in the 
+                                            shift register is a PEC */
+            volatile uint16_t PEC : 1;   /* Packet error checking
+                                            This bit is set and cleared by software, and cleared 
+                                            by hardware when PEC is transferred or
+                                            by a START or Stop condition or when PE=0.
+                                            0: No PEC transfer
+                                            1: PEC transfer (in Tx or Rx mode) */
+            volatile uint16_t ALERT : 1; /* SMBus alert
+                                            This bit is set and cleared by software, and 
+                                            cleared by hardware when PE=0.
+                                            0: Releases SMBA pin high. Alert Response 
+                                            Address Header followed by NACK.
+                                            1: Drives SMBA pin low. Alert Response 
+                                            Address Header followed by ACK. */
+            const volatile uint16_t : 1;
+            volatile uint16_t SWRST : 1; /* Software reset
+                                            When set, the I2C is under reset state. Before resetting this 
+                                            bit, make sure the I2C lines are
+                                            released and the bus is free.
+                                            0: I2C Peripheral not under reset
+                                            1: I2C Peripheral under reset state */
+        } I2C_CR1_b;
+    };
+
+    const volatile uint16_t RESERVED0;
+
+    /* I2C Control register 2 (I2C_CR2) */
+    union
+    {
+        volatile uint16_t I2C_CR2;
+        struct
+        {
+            volatile uint16_t FREQ : 6;  /* Peripheral clock frequency
+                                            The FREQ bits must be configured with the APB clock 
+                                            frequency value (I2C peripheral connected to APB). 
+                                            The FREQ field is used by the peripheral to generate data setup and
+                                            hold times compliant with the I2C specifications. 
+                                            The minimum allowed frequency is 2 MHz, the maximum frequency is 
+                                            limited by the maximum APB frequency and cannot exceed
+                                            50 MHz (peripheral intrinsic maximum limit).*/
+            const volatile uint16_t : 2;
+            volatile uint16_t ITERREN : 1;   /* Error interrupt enable
+                                                0: Error interrupt disabled
+                                                1: Error interrupt enabled
+                                                This interrupt is generated when:
+                                                – BERR = 1
+                                                – ARLO = 1
+                                                – AF = 1
+                                                – OVR = 1
+                                                – PECERR = 1
+                                                – TIMEOUT = 1
+                                                – SMBALERT = 1 */
+            volatile uint16_t ITEVTEN : 1;   /* Event interrupt enable
+                                                0: Event interrupt disabled
+                                                1: Event interrupt enabled
+                                                This interrupt is generated when:
+                                                – SB = 1 (Master)
+                                                – ADDR = 1 (Master/Slave)
+                                                – ADD10= 1 (Master)
+                                                – STOPF = 1 (Slave)
+                                                – BTF = 1 with no TxE or RxNE event
+                                                – TxE event to 1 if ITBUFEN = 1
+                                                – RxNE event to 1if ITBUFEN = 1 */
+            volatile uint16_t ITBUFEN : 1;   /* Buffer interrupt enable
+                                                0: TxE = 1 or RxNE = 1 does not 
+                                                generate any interrupt.
+                                                1: TxE = 1 or RxNE = 1 generates Event 
+                                                Interrupt (whatever the state of DMAEN) */
+            volatile uint16_t DMAEN : 1;     /* DMA requests enable
+                                                0: DMA requests disabled
+                                                1: DMA request enabled when TxE=1 or RxNE =1 */
+            volatile uint16_t LAST : 1; /* DMA last transfer
+                                            0: Next DMA EOT is not the last transfer
+                                            1: Next DMA EOT is the last transfer
+                                            Note: This bit is used in master receiver mode to permit 
+                                            the generation of a NACK on the last
+                                            received data */
+            const volatile uint16_t : 3;
+        } I2C_CR2_b;
+    };
+
+    const volatile uint16_t RESERVED1;
+
+    /* I2C Own address register 1 (I2C_OAR1) */
+    union
+    {
+        volatile uint16_t I2C_OAR1;
+        struct
+        {
+            volatile uint16_t ADD : 10;  /* Address in slave mode
+                                          [0]: bit 0 of 10-bit address
+                                          [7-1]: bits 7:1 of address
+                                          [9-8]: bits9:8 of address of 10-bit adress */
+            const volatile uint16_t : 5;
+            volatile uint16_t ADDMODE : 1;   /* Addressing mode (slave mode)
+                                            0: 7-bit slave address 
+                                            (10-bit address not acknowledged)
+                                            1: 10-bit slave address 
+                                            (7-bit address not acknowledged) */
+        } I2C_OAR1_b;
+    };
+
+    const volatile uint16_t RESERVED2;
+
+    /* I2C Own address register 2 (I2C_OAR2) */
+    union
+    {
+        volatile uint16_t I2C_OAR2;
+        struct
+        {
+            volatile uint16_t ENDUAL : 1;   /* Dual addressing mode enable
+                                                0: Only OAR1 is recognized in 7-bit 
+                                                addressing mode
+                                                1: Both OAR1 and OAR2 are recognized in 
+                                                7-bit addressing mode */
+            
+            volatile uint16_t ADD2 : 7;  /* Interface address
+                                            bits 7:1 of address in dual addressing mode */
+            const volatile uint16_t : 8;
+        } I2C_OAR2_b;
+    };
+
+    const volatile uint16_t RESERVED3;
+
+    /* I2C Status register 1 (I2C_SR1) */
+    union
+    {
+        volatile uint16_t I2C_SR1;
+        struct
+        {
+            const volatile uint16_t SB : 1;   /* Start bit (Master mode)
+                                            0: No Start condition
+                                            1: Start condition generated.
+                                            – Set when a Start condition generated.
+                                            – Cleared by software by reading the SR1 
+                                            register followed by writing the DR register, or by
+                                            hardware when PE=0 */
+            
+            const volatile uint16_t ADDR : 1;  /* Address sent (master mode)/matched (slave mode)
+                                                This bit is cleared by software reading SR1 register 
+                                                followed reading SR2, or by hardware when PE=0.
+                                                Address matched (Slave)
+                                                0: Address mismatched or not received.
+                                                1: Received address matched.
+                                                – Set by hardware as soon as the received 
+                                                slave address matched with the OAR registers
+                                                content or a general call or a SMBus 
+                                                Device Default Address or SMBus Host or SMBus Alert
+                                                is recognized. (when enabled depending on configuration). */
+            const volatile uint16_t BTF : 1; /* Byte transfer finished
+                                                0: Data byte transfer not done
+                                                1: Data byte transfer succeeded
+                                                – Set by hardware when NOSTRETCH=0 and:
+                                                – In reception when a new byte is received 
+                                                (including ACK pulse) and DR has not 
+                                                been read yet (RxNE=1).
+                                                – In transmission when a new byte should be sent and DR has 
+                                                not been written yet (TxE=1).
+                                                – Cleared by software reading SR1 followed by either
+                                                a read or write in the DR register or by
+                                                hardware after a start or a stop condition in 
+                                                transmission or when PE=0. */
+            const volatile uint16_t ADD10 : 1; /* 10-bit header sent (Master mode)
+                                                0: No ADD10 event occurred.
+                                                1: Master has sent first address byte (header).
+                                                – Set by hardware when the master has sent the 
+                                                first byte in 10-bit address mode.
+                                                – Cleared by software reading the SR1 register followed 
+                                                by a write in the DR register of the
+                                                second address byte, or by hardware when PE=0 */
+            const volatile uint16_t STOPF : 1; /* Stop detection (slave mode)
+                                                0: No Stop condition detected
+                                                1: Stop condition detected
+                                                – Set by hardware when a Stop condition is detected 
+                                                on the bus by the slave after an
+                                                acknowledge (if ACK=1).
+                                                – Cleared by software reading the SR1 register 
+                                                followed by a write in the CR1 register, or by
+                                                hardware when PE=0 */
+            const volatile uint16_t : 1;
+            const volatile uint16_t RxNE : 1; /* Data register not empty (receivers)
+                                                0: Data register empty
+                                                1: Data register not empty
+                                                – Set when data register is not empty 
+                                                in receiver mode. RxNE is not set during address phase.
+                                                – Cleared by software reading or writing the DR register or 
+                                                by hardware when PE=0. RxNE is not set in case of ARLO event. */
+            const volatile uint16_t TxE : 1; /* Data register empty (transmitters)
+                                                0: Data register not empty
+                                                1: Data register empty
+                                                – Set when DR is empty in transmission. 
+                                                TxE is not set during address phase.
+                                                – Cleared by software writing to the DR register or 
+                                                by hardware after a start or a stop condition
+                                                or when PE=0.
+                                                TxE is not set if either a NACK is received, or 
+                                                if next byte to be transmitted is PEC (PEC=1) */
+            volatile uint16_t BERR : 1;     /* Bus error
+                                                0: No misplaced Start or Stop condition
+                                                1: Misplaced Start or Stop condition
+                                                – Set by hardware when the interface detects an SDA rising or 
+                                                falling edge while SCL is high,
+                                                occurring in a non-valid position during a byte transfer.
+                                                – Cleared by software writing 0, or by hardware when PE=0. */
+            volatile uint16_t ARLO : 1;     /* Arbitration lost (master mode)
+                                                0: No Arbitration Lost detected
+                                                1: Arbitration Lost detected
+                                                Set by hardware when the interface loses the arbitration 
+                                                of the bus to another master
+                                                – Cleared by software writing 0, or by hardware when PE=0.
+                                                After an ARLO event the interface switches back 
+                                                automatically to Slave mode (MSL=0). */
+            volatile uint16_t AF : 1;       /* Acknowledge failure
+                                                0: No acknowledge failure
+                                                1: Acknowledge failure
+                                                – Set by hardware when no acknowledge is returned.
+                                                – Cleared by software writing 0, or by hardware 
+                                                when PE=0. */
+            volatile uint16_t OVR : 1;   /* Overrun/Underrun
+                                            0: No overrun/underrun
+                                            1: Overrun or underrun
+                                            – Set by hardware in slave mode when NOSTRETCH=1 and:
+                                            – In reception when a new byte is received (including 
+                                            ACK pulse) and the DR register has not
+                                            been read yet. New received byte is lost.
+                                            – In transmission when a new byte should be sent and 
+                                            the DR register has not been written
+                                            yet. The same byte is sent twice.
+                                            – Cleared by software writing 0, or by hardware when PE=0 */
+            volatile uint16_t PECERR : 1; /* PEC Error in reception
+                                            0: no PEC error: receiver returns ACK 
+                                            after PEC reception (if ACK=1)
+                                            1: PEC error: receiver returns NACK 
+                                            after PEC reception (whatever ACK) */
+            const volatile uint16_t : 1;
+            volatile uint16_t TIMEOUT : 1;   /* Timeout or Tlow error
+                                                0: No timeout error
+                                                1: SCL remained LOW for 25 ms (Timeout)
+                                                or
+                                                Master cumulative clock low extend time 
+                                                more than 10 ms (Tlow:mext)
+                                                or
+                                                Slave cumulative clock low extend time 
+                                                more than 25 ms (Tlow:sext)
+                                                – When set in slave mode: slave resets the 
+                                                communication and lines are released by hardware
+                                                – When set in master mode: Stop condition sent by hardware
+                                                – Cleared by software writing 0, or by hardware when PE=0 */
+            volatile uint16_t SMBALERT : 1;  /* SMBus alert
+                                                In SMBus host mode:
+                                                0: no SMBALERT
+                                                1: SMBALERT event occurred on pin
+                                                In SMBus slave mode:
+                                                0: no SMBALERT response address header
+                                                1: SMBALERT response address header to 
+                                                SMBALERT LOW received
+                                                – Cleared by software writing 0, or by 
+                                                hardware when PE=0. */
+        } I2C_SR1_b;
+    };
+
+    const volatile uint16_t RESERVED4;
+
+    /* I2C Status register 2 (I2C_SR2) */
+    union
+    {
+        const volatile uint16_t I2C_SR2;
+        struct
+        {
+            const volatile uint16_t MSL : 1; /* Master/slave
+                                                0: Slave Mode
+                                                1: Master Mode
+                                                – Set by hardware as soon as the 
+                                                interface is in Master mode (SB=1).
+                                                – Cleared by hardware after detecting a Stop 
+                                                condition on the bus or a loss of arbitration
+                                                (ARLO=1), or by hardware when PE=0 */
+            
+            const volatile uint16_t BUSY : 1;  /* Bus busy
+                                                0: No communication on the bus
+                                                1: Communication ongoing on the bus
+                                                – Set by hardware on detection of SDA or SCL low
+                                                – cleared by hardware on detection of a Stop condition. */
+            const volatile uint16_t TRA : 1; /* Transmitter/receiver
+                                                0: Data bytes received
+                                                1: Data bytes transmitted
+                                                This bit is set depending on the 
+                                                R/W bit of the address byte, at the end of total address
+                                                phase.
+                                                It is also cleared by hardware after detection 
+                                                of Stop condition (STOPF=1), repeated Start
+                                                condition, loss of bus arbitration (ARLO=1), or when PE=0. */
+            const volatile uint16_t : 1;
+            const volatile uint16_t GENCALL : 1; /* General call address (Slave mode)
+                                                    0: No General Call
+                                                    1: General Call Address received when ENGC=1
+                                                    – Cleared by hardware after a Stop condition 
+                                                    or repeated Start condition, or when PE=0. */
+            const volatile uint16_t SMBDEFAULT : 1; /* SMBus device default address (Slave mode)
+                                                        0: No SMBus Device Default address
+                                                        1: SMBus Device Default address received when ENARP=1
+                                                        – Cleared by hardware after a Stop condition or repeated 
+                                                        Start condition, or when PE=0. */
+            const volatile uint16_t SMBHOST : 1; /* SMBus host header (Slave mode)
+                                                    0: No SMBus Host address
+                                                    1: SMBus Host address received when SMBTYPE=1 and ENARP=1.
+                                                    – Cleared by hardware after a Stop condition or repeated 
+                                                    Start condition, or when PE=0. */
+            const volatile uint16_t DUALF : 1;   /* Dual flag (Slave mode)
+                                                    0: Received address matched with OAR1
+                                                    1: Received address matched with OAR2
+                                                    – Cleared by hardware after a Stop condition 
+                                                    or repeated Start condition, or when PE=0 */
+            const volatile uint16_t PEC : 8; /* Packet error checking register
+                                                This register contains the internal PEC when ENPEC=1 */
+        } I2C_SR2_b;
+    };
+
+    const volatile uint16_t RESERVED5;
+
+    /* I2C Clock control register (I2C_CCR) */
+    /* fPCLK1 must be at least 2 MHz to achieve Sm mode I²C frequencies. It must be at least 4
+    MHz to achieve Fm mode I²C frequencies. It must be a multiple of 10MHz to reach the
+    400 kHz maximum I²C Fm mode clock.
+    The CCR register must be configured only when the I2C is disabled (PE = 0). */
+    union
+    {
+        volatile uint16_t I2C_CCR;
+        struct
+        {
+            volatile uint16_t CCR : 12;   /* Clock control register in Fm/Sm mode (Master mode)
+                                            Controls the SCL clock in master mode.
+                                            Sm mode or SMBus:
+                                            Thigh = CCR * TPCLK1
+                                            Tlow = CCR * TPCLK1
+                                            Fm mode:
+                                            If DUTY = 0:
+                                            Thigh = CCR * TPCLK1
+                                            Tlow = 2 * CCR * TPCLK1
+                                            If DUTY = 1:
+                                            Thigh = 9 * CCR * TPCLK1
+                                            Tlow = 16 * CCR * TPCLK1
+                                            For instance: in Sm mode, to generate a 100 kHz SCL frequency:
+                                            If FREQ = 08, TPCLK1 = 125 ns so CCR must be programmed with 0x28
+                                            (0x28 <=> 40d x 125 ns = 5000 ns.) */
+            const volatile uint16_t : 2;
+            volatile uint16_t DUTY : 1;  /* Fm mode duty cycle
+                                            0: Fm mode tlow/thigh = 2
+                                            1: Fm mode tlow/thigh = 16/9 (see CCR) */
+            volatile uint16_t FS : 1; /* I2C master mode selection
+                                        0: Sm mode I2C
+                                        1: Fm mode I2C */
+        } I2C_CCR_b;
+    };
+
+    const volatile uint16_t RESERVED6;
+
+    /* I2C TRISE register (I2C_TRISE) */
+    /* TRISE[5:0] must be configured only when the I2C is disabled (PE = 0) */
+    union
+    {
+        volatile uint16_t I2C_TRISE;
+        struct
+        {
+            volatile uint16_t TRISE : 6;   /* Maximum rise time in Fm/Sm mode (Master mode)
+                                            These bits should provide the maximum duration of the SCL feedback 
+                                            loop in master mode.
+                                            The purpose is to keep a stable SCL frequency whatever the 
+                                            SCL rising edge duration.
+                                            These bits must be programmed with the maximum SCL 
+                                            rise time given in the I2C bus
+                                            specification, incremented by 1.
+                                            For instance: in Sm mode, the maximum allowed SCL 
+                                            rise time is 1000 ns.
+                                            If, in the I2C_CR2 register, the value of FREQ[5:0] bits 
+                                            is equal to 0x08 and TPCLK1 = 125 ns
+                                            therefore the TRISE[5:0] bits must be programmed with 09h.
+                                            (1000 ns / 125 ns = 8 + 1)
+                                            The filter value can also be added to TRISE[5:0].
+                                            If the result is not an integer, TRISE[5:0] must be programmed 
+                                            with the integer part, in order
+                                            to respect the tHIGH parameter. */
+            const volatile uint16_t : 10;
+        } I2C_TRISE_b;
+    };
+
+    const volatile uint16_t RESERVED7;
+} I2Cx_Type;
+
+#define I2C1_BASE        (0x40005400U)
+#define I2C2_BASE        (0x40005800U)
+
+#define I2C1 ((I2Cx_Type *)I2C1_BASE)
+#define I2C2 ((I2Cx_Type *)I2C2_BASE)
+
 #endif
