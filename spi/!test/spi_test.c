@@ -499,6 +499,7 @@ void spi_interrupt_test_case(void)
     slave_callback_status = SPI_CALLBACK_STATUS_NONE;
 
     spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_ENABLE;
+    /* Ignore Receive line to prevent the incorrect RX CRC transmit from slave */
     spi_cfg_3.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
     /* Set baud rate a bit slower to gurantee the CRC work perfectly */
     spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_128;
@@ -636,7 +637,10 @@ void spi_interrupt_test_case_1(void)
     spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
     spi_cfg_4.receive_ipl = 11U;
     spi_cfg_4.transmit_ipl = BSP_IRQ_DISABLE;
-    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
+    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY; 
     
     /* Open master first */
     SPI_Open(&spi_ctrl_3, &spi_cfg_3);
@@ -694,6 +698,9 @@ void spi_interrupt_test_case_1(void)
     spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
     spi_cfg_3.receive_ipl = 11U;
     spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
     spi_cfg_3.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY;
     spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
     spi_cfg_4.receive_ipl = BSP_IRQ_DISABLE;
@@ -910,7 +917,7 @@ void spi_interrupt_test_case_16bit(void)
     /* Test case 2: CRC feature */
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        src_16bit[i] = (i % 26U) + 'A';
+        src_16bit[i] = i;
     }
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
@@ -922,6 +929,7 @@ void spi_interrupt_test_case_16bit(void)
     slave_callback_status = SPI_CALLBACK_STATUS_NONE;
 
     spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_ENABLE;
+    /* Ignore Receive line to prevent the incorrect RX CRC transmit from slave */
     spi_cfg_3.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
     /* Set baud rate a bit slower to gurantee the CRC work perfectly */
     spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_128;
@@ -977,7 +985,7 @@ void spi_interrupt_test_case_16bit(void)
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        src_16bit[i] = (i % 26U) + 'A';
+        src_16bit[i] = i;
     }
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
@@ -1034,6 +1042,142 @@ void spi_interrupt_test_case_16bit(void)
     SPI_Close(&spi_ctrl_3);
     SPI_Close(&spi_ctrl_4);
 }
+
+void spi_interrupt_test_case_1_16bit(void)
+{
+    /* Test case 1: SPI1 master - SPI2 slave, transmit only - receive only mode */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_3.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_3.transmit_ipl = 12U;
+    spi_cfg_3.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.transmit_ipl = BSP_IRQ_DISABLE;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
+    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY; 
+    
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_4, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_3, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+
+    /* Test case 2: SPI1 slave - SPI2 master, transmit only - receive only mode */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
+    spi_cfg_3.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_4.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.transmit_ipl = 12U;
+    spi_cfg_4.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    
+    /* Open master first */
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_CallbackSet(&spi_ctrl_4, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_3, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_3, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_4, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_3);
+    SPI_Close(&spi_ctrl_4);
+}
+
 
 dma_ctrl_t dma_spi_tx_ctrl;
 dma_cfg_t dma_spi_tx_cfg = 
@@ -1134,9 +1278,15 @@ spi_cfg_t spi_cfg_dma_1 =
 void spi_dma_test_case(void)
 {
     uint8_t dummy_value;
+
     /* Test case 1: SPI1 master - SPI2 slave */
     /* Set up pin */
     spi_test_set_up_spi1_master_spi2_slave();
+
+    /* Open SPI1 master and read the DR register if the previous test case use master with 1 line TX */
+    SPI_Open(&spi_ctrl_dma_0, &spi_cfg_dma_0);
+    (void)spi_ctrl_dma_0.p_reg->SPI_DR;
+    SPI_Close(&spi_ctrl_dma_0);
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
     {
@@ -1260,19 +1410,25 @@ void spi_dma_test_case(void)
 
 void spi_dma_test_case_16bit(void)
 {
-    uint8_t dummy_value;
+    uint16_t dummy_value;
+
     /* Test case 1: SPI1 master - SPI2 slave */
     /* Set up pin */
     spi_test_set_up_spi1_master_spi2_slave();
 
+    /* Open SPI1 master and read the DR register if the previous test case use master with 1 line TX */
+    SPI_Open(&spi_ctrl_dma_0, &spi_cfg_dma_0);
+    (void)spi_ctrl_dma_0.p_reg->SPI_DR;
+    SPI_Close(&spi_ctrl_dma_0);
+
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        src[i] = i;
+        src_16bit[i] = i;
     }
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        dest[i] = 0U;
+        dest_16bit[i] = 0U;
     }
 
     /* Open master first */
@@ -1284,8 +1440,8 @@ void spi_dma_test_case_16bit(void)
 
     BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
 
-    SPI_Read(&spi_ctrl_dma_1, &dest, SPI_TEST_SIZE_16BIT);
-    SPI_Write(&spi_ctrl_dma_0, &src, SPI_TEST_SIZE_16BIT);
+    SPI_Read(&spi_ctrl_dma_1, &dest_16bit, SPI_TEST_SIZE_16BIT);
+    SPI_Write(&spi_ctrl_dma_0, &src_16bit, SPI_TEST_SIZE_16BIT);
 
     // Wait for Master DMA to finish TX
     while(spi_ctrl_dma_0.p_reg->SPI_SR_b.BSY); 
@@ -1301,7 +1457,7 @@ void spi_dma_test_case_16bit(void)
     /* Check transmit-receive data */
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        ASSERT(src[i] == dest[i]);
+        ASSERT(src_16bit[i] == dest_16bit[i]);
     }
 
     /* Check error flags */
@@ -1322,12 +1478,12 @@ void spi_dma_test_case_16bit(void)
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        src[i] = i;
+        src_16bit[i] = i;
     }
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        dest[i] = 0U;
+        dest_16bit[i] = 0U;
     }
 
     dma_spi_tx_cfg.channel = 5U;
@@ -1351,8 +1507,8 @@ void spi_dma_test_case_16bit(void)
 
     BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
 
-    SPI_Read(&spi_ctrl_dma_0, &dest, SPI_TEST_SIZE_16BIT);
-    SPI_Write(&spi_ctrl_dma_1, &src, SPI_TEST_SIZE_16BIT);
+    SPI_Read(&spi_ctrl_dma_0, &dest_16bit, SPI_TEST_SIZE_16BIT);
+    SPI_Write(&spi_ctrl_dma_1, &src_16bit, SPI_TEST_SIZE_16BIT);
 
     // Wait for Master DMA to finish TX
     while(spi_ctrl_dma_1.p_reg->SPI_SR_b.BSY);
@@ -1369,7 +1525,7 @@ void spi_dma_test_case_16bit(void)
     /* Check transmit-receive data */
     for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
     {
-        ASSERT(src[i] == dest[i]);
+        ASSERT(src_16bit[i] == dest_16bit[i]);
     }
 
     /* Check error flags */
@@ -1701,6 +1857,7 @@ void spi_run_test(void)
     spi_set_up_test_16bit();
     spi_polling_test_case_16bit();
     spi_interrupt_test_case_16bit();
+    spi_interrupt_test_case_1_16bit();
     spi_dma_test_case_16bit();
 }
 
