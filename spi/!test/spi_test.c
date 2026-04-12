@@ -1536,6 +1536,157 @@ static void spi_set_up_test(void)
     dma_spi_rx_cfg.unit = DMA_UNIT_1;
 }
 
+static void spi_set_up_test_16bit(void)
+{
+    spi_cfg_1.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_1.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_1.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_1.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_1.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_1.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_1.configuration_b.dma_receive_en = 0U;
+    spi_cfg_1.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_1.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_1.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_1.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_1.p_dma_rx_cfg = NULL;
+    spi_cfg_1.p_dma_rx_ctrl = NULL;
+    spi_cfg_1.p_dma_tx_cfg = NULL;
+    spi_cfg_1.p_dma_tx_ctrl = NULL;
+    spi_cfg_1.unit = SPI_UNIT_1;
+
+    spi_cfg_2.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_2.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_2.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_2.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_2.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_2.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_2.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_2.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_2.configuration_b.dma_receive_en = 0U;
+    spi_cfg_2.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_2.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_2.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_2.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_2.p_dma_rx_cfg = NULL;
+    spi_cfg_2.p_dma_rx_ctrl = NULL;
+    spi_cfg_2.p_dma_tx_cfg = NULL;
+    spi_cfg_2.p_dma_tx_ctrl = NULL;
+    spi_cfg_2.unit = SPI_UNIT_2;
+
+    spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_3.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_3.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_3.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_3.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_3.configuration_b.dma_receive_en = 0U;
+    spi_cfg_3.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_3.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_3.transmit_ipl = 12U;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.p_dma_rx_cfg = NULL;
+    spi_cfg_3.p_dma_rx_ctrl = NULL;
+    spi_cfg_3.p_dma_tx_cfg = NULL;
+    spi_cfg_3.p_dma_tx_ctrl = NULL;
+    spi_cfg_3.unit = SPI_UNIT_1;
+
+    spi_cfg_4.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_4.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_4.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_4.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_4.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_4.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_4.configuration_b.dma_receive_en = 0U;
+    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_4.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.p_dma_rx_cfg = NULL;
+    spi_cfg_4.p_dma_rx_ctrl = NULL;
+    spi_cfg_4.p_dma_tx_cfg = NULL;
+    spi_cfg_4.p_dma_tx_ctrl = NULL;
+    spi_cfg_4.unit = SPI_UNIT_2;
+
+    spi_cfg_dma_0.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_256;
+    spi_cfg_dma_0.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_dma_0.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_dma_0.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_dma_0.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_dma_0.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_0.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_dma_0.configuration_b.dma_transmit_en = 1U;
+    spi_cfg_dma_0.configuration_b.dma_receive_en = 0U;
+    spi_cfg_dma_0.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_dma_0.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_0.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_0.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_0.p_dma_rx_cfg = NULL;
+    spi_cfg_dma_0.p_dma_rx_ctrl = NULL;
+    spi_cfg_dma_0.p_dma_tx_cfg = &dma_spi_tx_cfg;
+    spi_cfg_dma_0.p_dma_tx_ctrl = &dma_spi_tx_ctrl;
+    spi_cfg_dma_0.unit = SPI_UNIT_1;
+
+    spi_cfg_dma_1.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_256;
+    spi_cfg_dma_1.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_dma_1.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_dma_1.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_dma_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_dma_1.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_dma_1.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_dma_1.configuration_b.dma_receive_en = 1U;
+    spi_cfg_dma_1.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_dma_1.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_1.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_1.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_1.p_dma_rx_cfg = &dma_spi_rx_cfg;
+    spi_cfg_dma_1.p_dma_rx_ctrl = &dma_spi_rx_ctrl;
+    spi_cfg_dma_1.p_dma_tx_cfg = NULL;
+    spi_cfg_dma_1.p_dma_tx_ctrl = NULL;
+    spi_cfg_dma_1.unit = SPI_UNIT_2;
+
+    dma_spi_tx_cfg.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_MEM;
+    dma_spi_tx_cfg.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_spi_tx_cfg.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_16_BITS;
+    dma_spi_tx_cfg.configuration_b.periph_size = DMA_PERIPH_SIZE_16_BITS;
+    dma_spi_tx_cfg.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_LOW;
+    dma_spi_tx_cfg.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.err_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.channel = 3U;
+    dma_spi_tx_cfg.unit = DMA_UNIT_1;
+
+    dma_spi_rx_cfg.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_PERIPH;
+    dma_spi_rx_cfg.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_spi_rx_cfg.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_16_BITS;
+    dma_spi_rx_cfg.configuration_b.periph_size = DMA_PERIPH_SIZE_16_BITS;
+    dma_spi_rx_cfg.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_HIGH;
+    dma_spi_rx_cfg.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.err_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.channel = 4U;
+    dma_spi_rx_cfg.unit = DMA_UNIT_1;
+}
+
 void spi_run_test(void)
 {
     /* TEST CASE 8BIT */
@@ -1547,17 +1698,7 @@ void spi_run_test(void)
     spi_dma_test_case();
 
     /* TEST CASE 16BIT */
-    spi_set_up_test();
-    spi_cfg_1.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
-    spi_cfg_2.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
-    spi_cfg_3.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
-    spi_cfg_4.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
-    spi_cfg_dma_0.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
-    spi_cfg_dma_1.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
-    dma_spi_tx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_16_BITS;
-    dma_spi_tx_cfg.configuration_b.periph_size = DMA_MEM_SIZE_16_BITS;
-    dma_spi_rx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_16_BITS;
-    dma_spi_rx_cfg.configuration_b.periph_size = DMA_MEM_SIZE_16_BITS;
+    spi_set_up_test_16bit();
     spi_polling_test_case_16bit();
     spi_interrupt_test_case_16bit();
     spi_dma_test_case_16bit();
