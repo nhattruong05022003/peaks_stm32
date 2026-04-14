@@ -1843,6 +1843,131 @@ static void spi_set_up_test_16bit(void)
     dma_spi_rx_cfg.unit = DMA_UNIT_1;
 }
 
+void spi_hardware_slave_select_test_case(void)
+{
+    /* Test case 1: SPI1 master - SPI2 slave */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        src[i] = (i % 26U) + 'A';
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        dest[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_AUTO; /* Must be set to 1 when using Hardware slave select */
+    spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    /* Must pull the NSS to low to state that SPI1 is master */
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    SPI_Read(&spi_ctrl_4, &dest, SPI_TEST_SIZE);
+    SPI_Write(&spi_ctrl_3, &src, SPI_TEST_SIZE);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        ASSERT(src[i] == dest[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+
+    /* Test case 2: SPI1 slave - SPI2 master */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        src[i] = (i % 26U) + 'A';
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        dest[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_4.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.transmit_ipl = 12U;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_AUTO; /* Must be set to 1 when using Hardware slave select */
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_CallbackSet(&spi_ctrl_4, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_3, user_slave_callback);
+
+    /* Must pull the NSS to low to state that SPI2 is master */
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    SPI_Read(&spi_ctrl_3, &dest, SPI_TEST_SIZE);
+    SPI_Write(&spi_ctrl_4, &src, SPI_TEST_SIZE);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        ASSERT(src[i] == dest[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_3);
+    SPI_Close(&spi_ctrl_4);
+}
+
 void spi_run_test(void)
 {
     /* TEST CASE 8BIT */
@@ -1859,6 +1984,10 @@ void spi_run_test(void)
     spi_interrupt_test_case_16bit();
     spi_interrupt_test_case_1_16bit();
     spi_dma_test_case_16bit();
+
+    /* Other test case */
+    spi_set_up_test();
+    spi_hardware_slave_select_test_case();
 }
 
 #endif
