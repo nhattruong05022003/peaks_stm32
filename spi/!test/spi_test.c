@@ -75,7 +75,7 @@ spi_cfg_t spi_cfg_1 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_MASTER,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -102,7 +102,7 @@ spi_cfg_t spi_cfg_2 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_SLAVE,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -373,7 +373,7 @@ spi_cfg_t spi_cfg_3 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_MASTER,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -400,7 +400,7 @@ spi_cfg_t spi_cfg_4 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_SLAVE,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -1232,7 +1232,7 @@ spi_cfg_t spi_cfg_dma_0 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_MASTER,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 1U,
         .dma_receive_en = 1U
@@ -1259,7 +1259,7 @@ spi_cfg_t spi_cfg_dma_1 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_SLAVE,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 1U
@@ -1549,7 +1549,7 @@ static void spi_set_up_test(void)
     spi_cfg_1.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_1.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_1.configuration_b.dma_transmit_en = 0U;
     spi_cfg_1.configuration_b.dma_receive_en = 0U;
@@ -1569,7 +1569,7 @@ static void spi_set_up_test(void)
     spi_cfg_2.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_2.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_2.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_2.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_2.configuration_b.dma_transmit_en = 0U;
     spi_cfg_2.configuration_b.dma_receive_en = 0U;
@@ -1589,7 +1589,7 @@ static void spi_set_up_test(void)
     spi_cfg_3.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_3.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_3.configuration_b.dma_transmit_en = 0U;
     spi_cfg_3.configuration_b.dma_receive_en = 0U;
@@ -1609,7 +1609,7 @@ static void spi_set_up_test(void)
     spi_cfg_4.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_4.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_4.configuration_b.dma_transmit_en = 0U;
     spi_cfg_4.configuration_b.dma_receive_en = 0U;
@@ -1629,7 +1629,7 @@ static void spi_set_up_test(void)
     spi_cfg_dma_0.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_dma_0.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_dma_0.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_dma_0.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_dma_0.configuration_b.dma_transmit_en = 1U;
     spi_cfg_dma_0.configuration_b.dma_receive_en = 0U;
@@ -1649,7 +1649,7 @@ static void spi_set_up_test(void)
     spi_cfg_dma_1.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_dma_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_dma_1.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_dma_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_dma_1.configuration_b.dma_transmit_en = 0U;
     spi_cfg_dma_1.configuration_b.dma_receive_en = 1U;
@@ -1700,7 +1700,7 @@ static void spi_set_up_test_16bit(void)
     spi_cfg_1.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_1.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_1.configuration_b.dma_transmit_en = 0U;
     spi_cfg_1.configuration_b.dma_receive_en = 0U;
@@ -1720,7 +1720,7 @@ static void spi_set_up_test_16bit(void)
     spi_cfg_2.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_2.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_2.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_2.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_2.configuration_b.dma_transmit_en = 0U;
     spi_cfg_2.configuration_b.dma_receive_en = 0U;
@@ -1740,7 +1740,7 @@ static void spi_set_up_test_16bit(void)
     spi_cfg_3.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_3.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_3.configuration_b.dma_transmit_en = 0U;
     spi_cfg_3.configuration_b.dma_receive_en = 0U;
@@ -1760,7 +1760,7 @@ static void spi_set_up_test_16bit(void)
     spi_cfg_4.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_4.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_4.configuration_b.dma_transmit_en = 0U;
     spi_cfg_4.configuration_b.dma_receive_en = 0U;
@@ -1780,7 +1780,7 @@ static void spi_set_up_test_16bit(void)
     spi_cfg_dma_0.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_dma_0.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_dma_0.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_dma_0.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_dma_0.configuration_b.dma_transmit_en = 1U;
     spi_cfg_dma_0.configuration_b.dma_receive_en = 0U;
@@ -1800,7 +1800,7 @@ static void spi_set_up_test_16bit(void)
     spi_cfg_dma_1.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_dma_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_dma_1.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_dma_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_dma_1.configuration_b.dma_transmit_en = 0U;
     spi_cfg_dma_1.configuration_b.dma_receive_en = 1U;
@@ -1863,7 +1863,7 @@ void spi_hardware_slave_select_test_case(void)
     slave_callback_status = SPI_CALLBACK_STATUS_NONE;
 
     spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
-    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_AUTO; /* Must be set to 1 when using Hardware slave select */
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_ENABLE; /* Must be set to 1 when using Hardware slave select */
     spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
     /* Open master first */
     SPI_Open(&spi_ctrl_3, &spi_cfg_3);
@@ -1927,8 +1927,8 @@ void spi_hardware_slave_select_test_case(void)
     spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
     spi_cfg_4.receive_ipl = 11U;
     spi_cfg_4.transmit_ipl = 12U;
-    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
-    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_AUTO; /* Must be set to 1 when using Hardware slave select */
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_ENABLE; /* Must be set to 1 when using Hardware slave select */
 
     /* Open master first */
     SPI_Open(&spi_ctrl_4, &spi_cfg_4);
