@@ -1968,6 +1968,77 @@ void spi_hardware_slave_select_test_case(void)
     SPI_Close(&spi_ctrl_4);
 }
 
+static uint8_t dest_master[SPI_TEST_SIZE];
+static uint8_t src_slave[SPI_TEST_SIZE];
+
+void spi_master_slave_tx_rx_test_case(void)
+{
+    /* Test case: SPI1 master - SPI2 slave transmit and receive each other */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        src_slave[i] = (i % 10U) + '0';
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        dest_master[i] = 0xAAU;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    /* Must be this baud rate for slave and master */
+    spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_128;
+    spi_cfg_4.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_64;
+    spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_ENABLE; /* Must be set to 1 when using Hardware slave select */
+    spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_4.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.transmit_ipl = 10U;
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+    SPI_Write(&spi_ctrl_4, &src_slave, SPI_TEST_SIZE);
+    SPI_Read(&spi_ctrl_3, &dest_master, SPI_TEST_SIZE);
+
+    while((master_callback_status != SPI_CALLBACK_STATUS_RECEIVE_COMPLETE) || (slave_callback_status != SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        ASSERT(src_slave[i] == dest_master[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+}
+
 void spi_run_test(void)
 {
     /* TEST CASE 8BIT */
@@ -1988,6 +2059,10 @@ void spi_run_test(void)
     /* Other test case */
     spi_set_up_test();
     spi_hardware_slave_select_test_case();
+
+    /* Master receive - Slave transmit  */
+    spi_set_up_test();
+    spi_master_slave_tx_rx_test_case();
 }
 
 #endif
