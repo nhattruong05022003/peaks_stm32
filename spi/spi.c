@@ -234,6 +234,12 @@ void SPI_Read(spi_ctrl_t *p_ctrl, void * p_dest, uint16_t size)
     {
         p_ctrl->p_dest = p_dest;
         p_ctrl->read_size = size;
+
+        /* If it's in Master mode, write dummy value to generate clock for slave */
+        if(p_ctrl->p_cfg->configuration_b.mode == SPI_MODE_MASTER)
+        {
+            p_ctrl->p_reg->SPI_DR = 0xFFU; /* Dummy to generate clock */
+        }
     }
 }
 
@@ -500,6 +506,15 @@ static void spi_rxi_isr(void * p_ctrl_arg)
                 p_ctrl->p_callback((void *) p_ctrl);
             }
         }
+        /* If it's in Master mode, write dummy value to generate clock for slave */
+        else if(p_ctrl->p_cfg->configuration_b.mode == SPI_MODE_MASTER)
+        {
+            p_ctrl->p_reg->SPI_DR = 0xFFU; /* Dummy to generate clock */
+        }
+        else
+        {
+            /* Do nothing */
+        } 
     }
     else
     {
