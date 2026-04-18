@@ -122,8 +122,8 @@ typedef enum e_spi_direction
  */
 typedef enum e_spi_slave_select
 {
-    SPI_SLAVE_SELECT_MANUAL, ///< Slave Select manually (can work with multiple slaves)
-    SPI_SLAVE_SELECT_AUTO ///< Slave Select automatically (can't work with multiple slaves)
+    SPI_SLAVE_SELECT_OUTPUT_DISABLE, ///< Slave Select disable
+    SPI_SLAVE_SELECT_OUTPUT_ENABLE ///< Slave Select enable
 } spi_slave_select_t;
 
 /**
