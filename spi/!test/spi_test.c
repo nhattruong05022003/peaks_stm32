@@ -62,6 +62,8 @@ static void spi_test_set_up_spi2_master_spi1_slave(void)
 
 #define SPI_TEST_SIZE 1024U
 
+#define SPI_TEST_SIZE_16BIT 512U
+
 spi_ctrl_t spi_ctrl_1;
 spi_cfg_t spi_cfg_1 = 
 {
@@ -73,7 +75,7 @@ spi_cfg_t spi_cfg_1 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_MASTER,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -100,7 +102,7 @@ spi_cfg_t spi_cfg_2 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_SLAVE,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -118,6 +120,9 @@ spi_cfg_t spi_cfg_2 =
 
 static uint8_t src[SPI_TEST_SIZE];
 static uint8_t dest[SPI_TEST_SIZE];
+
+static uint16_t src_16bit[SPI_TEST_SIZE_16BIT];
+static uint16_t dest_16bit[SPI_TEST_SIZE_16BIT];
 
 void spi_polling_test_case(void)
 {
@@ -238,6 +243,125 @@ void spi_polling_test_case(void)
     SPI_Close(&spi_ctrl_2);
 }
 
+void spi_polling_test_case_16bit(void)
+{
+    uint16_t dummy_value;
+    /* Test case 1: Test transmit - receive for SPI1 master and SPI2 slave with polling */
+
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_1, &spi_cfg_1);
+    SPI_Open(&spi_ctrl_2, &spi_cfg_2);
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        /* Master transmit */
+        SPI_PollingWrite(&spi_ctrl_1, &src_16bit[i]);
+        
+        /* Slave receive */
+        SPI_PollingRead(&spi_ctrl_2, &dest_16bit[i]);
+    }
+
+    /* Since it's a full-duplex mode, slave also sent the data to master. 
+       Perform dummy read to clear RXNE flag */
+    SPI_PollingRead(&spi_ctrl_1, &dummy_value);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_1.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_1.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_1.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_2.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_2.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_2.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Open slave first */
+    SPI_Close(&spi_ctrl_2);
+    SPI_Close(&spi_ctrl_1);
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+    
+    /* Test case 2: Test transmit - receive for SPI2 master and SPI1 slave with polling */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    spi_cfg_1.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_2.configuration_b.mode = SPI_MODE_MASTER;
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_2, &spi_cfg_2);
+    SPI_Open(&spi_ctrl_1, &spi_cfg_1);
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        /* Master transmit */
+        SPI_PollingWrite(&spi_ctrl_2, &src_16bit[i]);
+        
+        /* Slave receive */
+        SPI_PollingRead(&spi_ctrl_1, &dest_16bit[i]);
+    }
+
+    /* Since it's a full-duplex mode, slave also sent the data to master. 
+       Perform dummy read to clear RXNE flag */
+    SPI_PollingRead(&spi_ctrl_2, &dummy_value);
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_1.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_1.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_1.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_2.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_2.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_2.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_1);
+    SPI_Close(&spi_ctrl_2);
+}
+
 spi_ctrl_t spi_ctrl_3;
 spi_cfg_t spi_cfg_3 = 
 {
@@ -249,7 +373,7 @@ spi_cfg_t spi_cfg_3 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_MASTER,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -276,7 +400,7 @@ spi_cfg_t spi_cfg_4 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_SLAVE,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 0U
@@ -326,7 +450,6 @@ void spi_interrupt_test_case(void)
 
     /* Open master first */
     SPI_Open(&spi_ctrl_3, &spi_cfg_3);
-    spi_cfg_4.transmit_ipl = 12U;
     SPI_Open(&spi_ctrl_4, &spi_cfg_4);
     SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
     SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
@@ -376,6 +499,7 @@ void spi_interrupt_test_case(void)
     slave_callback_status = SPI_CALLBACK_STATUS_NONE;
 
     spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_ENABLE;
+    /* Ignore Receive line to prevent the incorrect RX CRC transmit from slave */
     spi_cfg_3.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
     /* Set baud rate a bit slower to gurantee the CRC work perfectly */
     spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_128;
@@ -513,7 +637,10 @@ void spi_interrupt_test_case_1(void)
     spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
     spi_cfg_4.receive_ipl = 11U;
     spi_cfg_4.transmit_ipl = BSP_IRQ_DISABLE;
-    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
+    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY; 
     
     /* Open master first */
     SPI_Open(&spi_ctrl_3, &spi_cfg_3);
@@ -571,6 +698,9 @@ void spi_interrupt_test_case_1(void)
     spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
     spi_cfg_3.receive_ipl = 11U;
     spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
     spi_cfg_3.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY;
     spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
     spi_cfg_4.receive_ipl = BSP_IRQ_DISABLE;
@@ -728,6 +858,327 @@ void spi_error_test_case(void)
     SPI_Close(&spi_ctrl_3);
 }
 
+void spi_interrupt_test_case_16bit(void)
+{
+    /* Test case 1: SPI1 master - SPI2 slave */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_4, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_3, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+
+    /* Test case 2: CRC feature */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_ENABLE;
+    /* Ignore Receive line to prevent the incorrect RX CRC transmit from slave */
+    spi_cfg_3.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    /* Set baud rate a bit slower to gurantee the CRC work perfectly */
+    spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_128;
+    spi_cfg_4.configuration_b.crc_en = SPI_HARDWARE_CRC_ENABLE;
+    spi_cfg_4.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_4;
+    /* Developer doesn't know why only these 2 baud rate div options can perform CRC smoothly */
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_4, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_3, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.CRCERR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.CRCERR == 0U);
+
+    spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_4.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_3.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+
+    /* Test case 3: SPI1 slave - SPI2 master */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_4.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.transmit_ipl = 12U;
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_CallbackSet(&spi_ctrl_4, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_3, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_3, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_4, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_3);
+    SPI_Close(&spi_ctrl_4);
+}
+
+void spi_interrupt_test_case_1_16bit(void)
+{
+    /* Test case 1: SPI1 master - SPI2 slave, transmit only - receive only mode */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_3.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_3.transmit_ipl = 12U;
+    spi_cfg_3.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.transmit_ipl = BSP_IRQ_DISABLE;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
+    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY; 
+    
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_4, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_3, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+
+    /* Test case 2: SPI1 slave - SPI2 master, transmit only - receive only mode */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    /* Use to line receive only to avoid changing the line */
+    /* If using 1 line receive only, the RX line of slave will be MISO 
+    -> must re-connect the write for testing */
+    spi_cfg_3.direction = SPI_DIRECTION_2_LINES_RECEIVE_ONLY;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_4.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.transmit_ipl = 12U;
+    spi_cfg_4.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    
+    /* Open master first */
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_CallbackSet(&spi_ctrl_4, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_3, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    /* Size muste be 512U * 2 since the interrupt feature count size using byte */
+    SPI_Read(&spi_ctrl_3, &dest_16bit, SPI_TEST_SIZE_16BIT * 2U);
+    SPI_Write(&spi_ctrl_4, &src_16bit, SPI_TEST_SIZE_16BIT * 2U);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_3);
+    SPI_Close(&spi_ctrl_4);
+}
+
+
 dma_ctrl_t dma_spi_tx_ctrl;
 dma_cfg_t dma_spi_tx_cfg = 
 {
@@ -781,7 +1232,7 @@ spi_cfg_t spi_cfg_dma_0 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_MASTER,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 1U,
         .dma_receive_en = 1U
@@ -808,7 +1259,7 @@ spi_cfg_t spi_cfg_dma_1 =
         .data_mode = SPI_DATA_MODE_0,
         .frame_format = SPI_FRAME_FORMAT_MSB_FIRST,
         .mode = SPI_MODE_SLAVE,
-        .slave_select_mode = SPI_SLAVE_SELECT_MANUAL,
+        .slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE,
         .soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE,
         .dma_transmit_en = 0U,
         .dma_receive_en = 1U
@@ -827,9 +1278,15 @@ spi_cfg_t spi_cfg_dma_1 =
 void spi_dma_test_case(void)
 {
     uint8_t dummy_value;
+
     /* Test case 1: SPI1 master - SPI2 slave */
     /* Set up pin */
     spi_test_set_up_spi1_master_spi2_slave();
+
+    /* Open SPI1 master and read the DR register if the previous test case use master with 1 line TX */
+    SPI_Open(&spi_ctrl_dma_0, &spi_cfg_dma_0);
+    (void)spi_ctrl_dma_0.p_reg->SPI_DR;
+    SPI_Close(&spi_ctrl_dma_0);
 
     for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
     {
@@ -951,6 +1408,139 @@ void spi_dma_test_case(void)
     SPI_Close(&spi_ctrl_dma_1);
 }
 
+void spi_dma_test_case_16bit(void)
+{
+    uint16_t dummy_value;
+
+    /* Test case 1: SPI1 master - SPI2 slave */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    /* Open SPI1 master and read the DR register if the previous test case use master with 1 line TX */
+    SPI_Open(&spi_ctrl_dma_0, &spi_cfg_dma_0);
+    (void)spi_ctrl_dma_0.p_reg->SPI_DR;
+    SPI_Close(&spi_ctrl_dma_0);
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    /* Open master first */
+    dma_spi_tx_cfg.channel = 3U;
+    dma_spi_rx_cfg.channel = 4U;
+
+    SPI_Open(&spi_ctrl_dma_0, &spi_cfg_dma_0);
+    SPI_Open(&spi_ctrl_dma_1, &spi_cfg_dma_1);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    SPI_Read(&spi_ctrl_dma_1, &dest_16bit, SPI_TEST_SIZE_16BIT);
+    SPI_Write(&spi_ctrl_dma_0, &src_16bit, SPI_TEST_SIZE_16BIT);
+
+    // Wait for Master DMA to finish TX
+    while(spi_ctrl_dma_0.p_reg->SPI_SR_b.BSY); 
+    // Wait for Slave DMA to finish RX
+    while(spi_ctrl_dma_1.p_reg->SPI_SR_b.BSY);
+
+    /* Dummy read to advoid OVERRUN when transmitting the last data */
+    dummy_value = spi_ctrl_dma_0.p_reg->SPI_DR;
+    (void) dummy_value;
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_dma_0.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_dma_0.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_dma_0.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_dma_1.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_dma_1.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_dma_1.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_dma_1);
+    SPI_Close(&spi_ctrl_dma_0);
+
+    /* Test case 2: SPI2 master - SPI1 slave */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        src_16bit[i] = i;
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        dest_16bit[i] = 0U;
+    }
+
+    dma_spi_tx_cfg.channel = 5U;
+    dma_spi_rx_cfg.channel = 2U;
+
+    spi_cfg_dma_0.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_dma_0.configuration_b.dma_receive_en = 1U;
+    spi_cfg_dma_0.p_dma_rx_cfg = &dma_spi_rx_cfg;
+    spi_cfg_dma_0.p_dma_rx_ctrl = &dma_spi_rx_ctrl;
+    spi_cfg_dma_0.configuration_b.mode = SPI_MODE_SLAVE;
+
+    spi_cfg_dma_1.configuration_b.dma_transmit_en = 1U;
+    spi_cfg_dma_1.configuration_b.dma_receive_en = 0U;
+    spi_cfg_dma_1.p_dma_tx_cfg = &dma_spi_tx_cfg;
+    spi_cfg_dma_1.p_dma_tx_ctrl = &dma_spi_tx_ctrl;
+    spi_cfg_dma_1.configuration_b.mode = SPI_MODE_MASTER;
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_dma_1, &spi_cfg_dma_1);
+    SPI_Open(&spi_ctrl_dma_0, &spi_cfg_dma_0);
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    SPI_Read(&spi_ctrl_dma_0, &dest_16bit, SPI_TEST_SIZE_16BIT);
+    SPI_Write(&spi_ctrl_dma_1, &src_16bit, SPI_TEST_SIZE_16BIT);
+
+    // Wait for Master DMA to finish TX
+    while(spi_ctrl_dma_1.p_reg->SPI_SR_b.BSY);
+
+    // Wait for Slave DMA to finish RX
+    while(spi_ctrl_dma_0.p_reg->SPI_SR_b.BSY);
+
+    /* Dummy read to advoid OVERRUN when transmitting the last data */
+    dummy_value = spi_ctrl_dma_1.p_reg->SPI_DR;
+    (void) dummy_value;
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE_16BIT; i++)
+    {
+        ASSERT(src_16bit[i] == dest_16bit[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_dma_0.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_dma_0.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_dma_0.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_dma_1.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_dma_1.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_dma_1.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_dma_0);
+    SPI_Close(&spi_ctrl_dma_1);
+}
+
 static void spi_set_up_test(void)
 {
     spi_cfg_1.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
@@ -959,7 +1549,7 @@ static void spi_set_up_test(void)
     spi_cfg_1.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_1.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_1.configuration_b.dma_transmit_en = 0U;
     spi_cfg_1.configuration_b.dma_receive_en = 0U;
@@ -979,7 +1569,7 @@ static void spi_set_up_test(void)
     spi_cfg_2.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_2.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_2.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_2.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_2.configuration_b.dma_transmit_en = 0U;
     spi_cfg_2.configuration_b.dma_receive_en = 0U;
@@ -999,7 +1589,7 @@ static void spi_set_up_test(void)
     spi_cfg_3.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_3.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_3.configuration_b.dma_transmit_en = 0U;
     spi_cfg_3.configuration_b.dma_receive_en = 0U;
@@ -1019,7 +1609,7 @@ static void spi_set_up_test(void)
     spi_cfg_4.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_4.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_4.configuration_b.dma_transmit_en = 0U;
     spi_cfg_4.configuration_b.dma_receive_en = 0U;
@@ -1039,7 +1629,7 @@ static void spi_set_up_test(void)
     spi_cfg_dma_0.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_dma_0.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_dma_0.configuration_b.mode = SPI_MODE_MASTER;
-    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_dma_0.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_dma_0.configuration_b.dma_transmit_en = 1U;
     spi_cfg_dma_0.configuration_b.dma_receive_en = 0U;
@@ -1059,7 +1649,7 @@ static void spi_set_up_test(void)
     spi_cfg_dma_1.configuration_b.data_mode = SPI_DATA_MODE_0;
     spi_cfg_dma_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
     spi_cfg_dma_1.configuration_b.mode = SPI_MODE_SLAVE;
-    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_MANUAL;
+    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
     spi_cfg_dma_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
     spi_cfg_dma_1.configuration_b.dma_transmit_en = 0U;
     spi_cfg_dma_1.configuration_b.dma_receive_en = 1U;
@@ -1072,16 +1662,407 @@ static void spi_set_up_test(void)
     spi_cfg_dma_1.p_dma_tx_cfg = NULL;
     spi_cfg_dma_1.p_dma_tx_ctrl = NULL;
     spi_cfg_dma_1.unit = SPI_UNIT_2;
+
+    dma_spi_tx_cfg.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_MEM;
+    dma_spi_tx_cfg.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_spi_tx_cfg.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_8_BITS;
+    dma_spi_tx_cfg.configuration_b.periph_size = DMA_PERIPH_SIZE_8_BITS;
+    dma_spi_tx_cfg.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_LOW;
+    dma_spi_tx_cfg.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.err_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.channel = 3U;
+    dma_spi_tx_cfg.unit = DMA_UNIT_1;
+
+    dma_spi_rx_cfg.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_PERIPH;
+    dma_spi_rx_cfg.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_spi_rx_cfg.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_8_BITS;
+    dma_spi_rx_cfg.configuration_b.periph_size = DMA_PERIPH_SIZE_8_BITS;
+    dma_spi_rx_cfg.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_HIGH;
+    dma_spi_rx_cfg.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.err_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.channel = 4U;
+    dma_spi_rx_cfg.unit = DMA_UNIT_1;
+}
+
+static void spi_set_up_test_16bit(void)
+{
+    spi_cfg_1.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_1.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_1.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_1.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_1.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_1.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_1.configuration_b.dma_receive_en = 0U;
+    spi_cfg_1.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_1.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_1.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_1.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_1.p_dma_rx_cfg = NULL;
+    spi_cfg_1.p_dma_rx_ctrl = NULL;
+    spi_cfg_1.p_dma_tx_cfg = NULL;
+    spi_cfg_1.p_dma_tx_ctrl = NULL;
+    spi_cfg_1.unit = SPI_UNIT_1;
+
+    spi_cfg_2.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_2.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_2.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_2.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_2.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_2.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_2.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_2.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_2.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_2.configuration_b.dma_receive_en = 0U;
+    spi_cfg_2.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_2.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_2.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_2.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_2.p_dma_rx_cfg = NULL;
+    spi_cfg_2.p_dma_rx_ctrl = NULL;
+    spi_cfg_2.p_dma_tx_cfg = NULL;
+    spi_cfg_2.p_dma_tx_ctrl = NULL;
+    spi_cfg_2.unit = SPI_UNIT_2;
+
+    spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_3.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_3.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_3.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_3.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_3.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_3.configuration_b.dma_receive_en = 0U;
+    spi_cfg_3.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_3.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_3.transmit_ipl = 12U;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.p_dma_rx_cfg = NULL;
+    spi_cfg_3.p_dma_rx_ctrl = NULL;
+    spi_cfg_3.p_dma_tx_cfg = NULL;
+    spi_cfg_3.p_dma_tx_ctrl = NULL;
+    spi_cfg_3.unit = SPI_UNIT_1;
+
+    spi_cfg_4.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_2;
+    spi_cfg_4.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_4.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_4.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_4.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_4.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_4.configuration_b.dma_receive_en = 0U;
+    spi_cfg_4.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_4.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.p_dma_rx_cfg = NULL;
+    spi_cfg_4.p_dma_rx_ctrl = NULL;
+    spi_cfg_4.p_dma_tx_cfg = NULL;
+    spi_cfg_4.p_dma_tx_ctrl = NULL;
+    spi_cfg_4.unit = SPI_UNIT_2;
+
+    spi_cfg_dma_0.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_256;
+    spi_cfg_dma_0.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_dma_0.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_dma_0.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_dma_0.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_dma_0.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_dma_0.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_dma_0.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_dma_0.configuration_b.dma_transmit_en = 1U;
+    spi_cfg_dma_0.configuration_b.dma_receive_en = 0U;
+    spi_cfg_dma_0.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_dma_0.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_0.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_0.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_0.p_dma_rx_cfg = NULL;
+    spi_cfg_dma_0.p_dma_rx_ctrl = NULL;
+    spi_cfg_dma_0.p_dma_tx_cfg = &dma_spi_tx_cfg;
+    spi_cfg_dma_0.p_dma_tx_ctrl = &dma_spi_tx_ctrl;
+    spi_cfg_dma_0.unit = SPI_UNIT_1;
+
+    spi_cfg_dma_1.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_256;
+    spi_cfg_dma_1.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_dma_1.configuration_b.data_frame = SPI_DATA_FRAME_FORMAT_16_BITS;
+    spi_cfg_dma_1.configuration_b.data_mode = SPI_DATA_MODE_0;
+    spi_cfg_dma_1.configuration_b.frame_format = SPI_FRAME_FORMAT_MSB_FIRST;
+    spi_cfg_dma_1.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_dma_1.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_dma_1.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_ENABLE;
+    spi_cfg_dma_1.configuration_b.dma_transmit_en = 0U;
+    spi_cfg_dma_1.configuration_b.dma_receive_en = 1U;
+    spi_cfg_dma_1.direction = SPI_DIRECTION_2_LINES_FULL_DUPLEX;
+    spi_cfg_dma_1.err_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_1.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_1.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_dma_1.p_dma_rx_cfg = &dma_spi_rx_cfg;
+    spi_cfg_dma_1.p_dma_rx_ctrl = &dma_spi_rx_ctrl;
+    spi_cfg_dma_1.p_dma_tx_cfg = NULL;
+    spi_cfg_dma_1.p_dma_tx_ctrl = NULL;
+    spi_cfg_dma_1.unit = SPI_UNIT_2;
+
+    dma_spi_tx_cfg.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_MEM;
+    dma_spi_tx_cfg.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_spi_tx_cfg.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_DISABLE;
+    dma_spi_tx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_16_BITS;
+    dma_spi_tx_cfg.configuration_b.periph_size = DMA_PERIPH_SIZE_16_BITS;
+    dma_spi_tx_cfg.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_LOW;
+    dma_spi_tx_cfg.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.err_ipl = BSP_IRQ_DISABLE;
+    dma_spi_tx_cfg.channel = 3U;
+    dma_spi_tx_cfg.unit = DMA_UNIT_1;
+
+    dma_spi_rx_cfg.configuration_b.tranfer_direction = DMA_TRANFER_DIRECTION_READ_FROM_PERIPH;
+    dma_spi_rx_cfg.configuration_b.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.m2m_mode = DMA_MEM2MEM_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.mem_inc_mode = DMA_MEM_INC_MODE_ENABLE;
+    dma_spi_rx_cfg.configuration_b.periph_inc_mode = DMA_PERIPH_INC_MODE_DISABLE;
+    dma_spi_rx_cfg.configuration_b.mem_size = DMA_MEM_SIZE_16_BITS;
+    dma_spi_rx_cfg.configuration_b.periph_size = DMA_PERIPH_SIZE_16_BITS;
+    dma_spi_rx_cfg.configuration_b.channel_priority = DMA_CHANNEL_PRIORITY_HIGH;
+    dma_spi_rx_cfg.tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.half_tranfer_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.err_ipl = BSP_IRQ_DISABLE;
+    dma_spi_rx_cfg.channel = 4U;
+    dma_spi_rx_cfg.unit = DMA_UNIT_1;
+}
+
+void spi_hardware_slave_select_test_case(void)
+{
+    /* Test case 1: SPI1 master - SPI2 slave */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        src[i] = (i % 26U) + 'A';
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        dest[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_ENABLE; /* Must be set to 1 when using Hardware slave select */
+    spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    /* Must pull the NSS to low to state that SPI1 is master */
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+
+    SPI_Read(&spi_ctrl_4, &dest, SPI_TEST_SIZE);
+    SPI_Write(&spi_ctrl_3, &src, SPI_TEST_SIZE);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        ASSERT(src[i] == dest[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
+
+    /* Test case 2: SPI1 slave - SPI2 master */
+    /* Set up pin */
+    spi_test_set_up_spi2_master_spi1_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        src[i] = (i % 26U) + 'A';
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        dest[i] = 0U;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    spi_cfg_3.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_4.configuration_b.crc_en = SPI_HARDWARE_CRC_DISABLE;
+    spi_cfg_3.configuration_b.mode = SPI_MODE_SLAVE;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.configuration_b.mode = SPI_MODE_MASTER;
+    spi_cfg_4.receive_ipl = 11U;
+    spi_cfg_4.transmit_ipl = 12U;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_ENABLE; /* Must be set to 1 when using Hardware slave select */
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_CallbackSet(&spi_ctrl_4, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_3, user_slave_callback);
+
+    /* Must pull the NSS to low to state that SPI2 is master */
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_LOW);
+
+    SPI_Read(&spi_ctrl_3, &dest, SPI_TEST_SIZE);
+    SPI_Write(&spi_ctrl_4, &src, SPI_TEST_SIZE);
+
+    while((master_callback_status == SPI_CALLBACK_STATUS_NONE) || (slave_callback_status == SPI_CALLBACK_STATUS_NONE));
+
+    BSP_IO_Write(BSP_IO_PORTB_PIN_12, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        ASSERT(src[i] == dest[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_3);
+    SPI_Close(&spi_ctrl_4);
+}
+
+static uint8_t dest_master[SPI_TEST_SIZE];
+static uint8_t src_slave[SPI_TEST_SIZE];
+
+void spi_master_slave_tx_rx_test_case(void)
+{
+    /* Test case: SPI1 master - SPI2 slave transmit and receive each other */
+    /* Set up pin */
+    spi_test_set_up_spi1_master_spi2_slave();
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        src_slave[i] = (i % 10U) + '0';
+    }
+
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        dest_master[i] = 0xAAU;
+    }
+
+    master_callback_status = SPI_CALLBACK_STATUS_NONE;
+    slave_callback_status = SPI_CALLBACK_STATUS_NONE;
+
+    /* Must be this baud rate for slave and master */
+    spi_cfg_3.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_128;
+    spi_cfg_4.configuration_b.baud_rate = SPI_BAUD_RATE_CLK_DIV_64;
+    spi_cfg_3.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    spi_cfg_3.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_ENABLE; /* Must be set to 1 when using Hardware slave select */
+    spi_cfg_4.configuration_b.soft_slave_en = SPI_SOFTWARE_SLAVE_MANAGE_DISABLE;
+    spi_cfg_4.configuration_b.slave_select_mode = SPI_SLAVE_SELECT_OUTPUT_DISABLE;
+    spi_cfg_4.direction = SPI_DIRECTION_1_LINE_TRANSMIT_ONLY;
+    spi_cfg_3.receive_ipl = 11U;
+    spi_cfg_3.transmit_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.receive_ipl = BSP_IRQ_DISABLE;
+    spi_cfg_4.transmit_ipl = 10U;
+
+    /* Open master first */
+    SPI_Open(&spi_ctrl_3, &spi_cfg_3);
+    SPI_Open(&spi_ctrl_4, &spi_cfg_4);
+    SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
+    SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
+    SPI_Write(&spi_ctrl_4, &src_slave, SPI_TEST_SIZE);
+    SPI_Read(&spi_ctrl_3, &dest_master, SPI_TEST_SIZE);
+
+    while((master_callback_status != SPI_CALLBACK_STATUS_RECEIVE_COMPLETE) || (slave_callback_status != SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE));
+
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_HIGH);
+
+    ASSERT(master_callback_status == SPI_CALLBACK_STATUS_RECEIVE_COMPLETE);
+    ASSERT(slave_callback_status == SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE);
+
+    /* Check transmit-receive data */
+    for(uint16_t i = 0U; i < SPI_TEST_SIZE; i++)
+    {
+        ASSERT(src_slave[i] == dest_master[i]);
+    }
+
+    /* Check error flags */
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_3.p_reg->SPI_SR_b.UDR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.BSY == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.OVR == 0U);
+    ASSERT(spi_ctrl_4.p_reg->SPI_SR_b.UDR == 0U);
+
+    /* Close slave first */
+    SPI_Close(&spi_ctrl_4);
+    SPI_Close(&spi_ctrl_3);
 }
 
 void spi_run_test(void)
 {
+    /* TEST CASE 8BIT */
     spi_set_up_test();
     spi_polling_test_case();
     spi_interrupt_test_case();
     spi_interrupt_test_case_1();
     spi_error_test_case();
     spi_dma_test_case();
+
+    /* TEST CASE 16BIT */
+    spi_set_up_test_16bit();
+    spi_polling_test_case_16bit();
+    spi_interrupt_test_case_16bit();
+    spi_interrupt_test_case_1_16bit();
+    spi_dma_test_case_16bit();
+
+    /* Other test case */
+    spi_set_up_test();
+    spi_hardware_slave_select_test_case();
+
+    /* Master receive - Slave transmit  */
+    spi_set_up_test();
+    spi_master_slave_tx_rx_test_case();
 }
 
 #endif
