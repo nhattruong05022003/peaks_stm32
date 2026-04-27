@@ -238,7 +238,7 @@ void SPI_Read(spi_ctrl_t *p_ctrl, void * p_dest, uint16_t size)
         /* If it's in Master mode, write dummy value to generate clock for slave */
         if(p_ctrl->p_cfg->configuration_b.mode == SPI_MODE_MASTER)
         {
-            p_ctrl->p_reg->SPI_DR = 0xFFU; /* Dummy to generate clock */
+            p_ctrl->p_reg->SPI_DR = 0xAAU; /* Dummy to generate clock */
         }
     }
 }
@@ -440,6 +440,7 @@ static void spi_txi_isr(void * p_ctrl_arg)
         if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
         {
             p_ctrl->p_reg->SPI_DR = *(volatile uint8_t *) p_ctrl->p_src;
+            __DMB(); /* Ensure that the data was finished writing to SPI_DR register */
 
             /* Trigge CRC transmit */
             if((p_ctrl->write_size == 0U) && (p_ctrl->p_cfg->configuration_b.crc_en))
@@ -452,6 +453,7 @@ static void spi_txi_isr(void * p_ctrl_arg)
         else
         {
             p_ctrl->p_reg->SPI_DR = *(volatile uint16_t *) p_ctrl->p_src;
+            __DMB(); /* Ensure that the data was finished writing to SPI_DR register */
 
             /* Trigge CRC transmit */
             if((p_ctrl->write_size == 0U) && (p_ctrl->p_cfg->configuration_b.crc_en))
@@ -488,12 +490,16 @@ static void spi_rxi_isr(void * p_ctrl_arg)
         if(p_ctrl->p_cfg->configuration_b.data_frame == SPI_DATA_FRAME_FORMAT_8_BITS)
         {
             *(volatile uint8_t *) p_ctrl->p_dest = p_ctrl->p_reg->SPI_DR;
+            __DMB(); /* Ensure that the data was finished reading from SPI_DR register */
+
             p_ctrl->p_dest += 1U;
             p_ctrl->read_size -= 1U;
         }
         else
         {
             *(volatile uint16_t *) p_ctrl->p_dest = p_ctrl->p_reg->SPI_DR;
+            __DMB(); /* Ensure that the data was finished reading from SPI_DR register */
+
             p_ctrl->p_dest += 2U;
             p_ctrl->read_size -= 2U;
         }
@@ -509,7 +515,7 @@ static void spi_rxi_isr(void * p_ctrl_arg)
         /* If it's in Master mode, write dummy value to generate clock for slave */
         else if(p_ctrl->p_cfg->configuration_b.mode == SPI_MODE_MASTER)
         {
-            p_ctrl->p_reg->SPI_DR = 0xFFU; /* Dummy to generate clock */
+            p_ctrl->p_reg->SPI_DR = 0xAAU; /* Dummy to generate clock */
         }
         else
         {

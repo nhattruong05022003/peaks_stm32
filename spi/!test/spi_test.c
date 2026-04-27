@@ -2009,8 +2009,8 @@ void spi_master_slave_tx_rx_test_case(void)
     SPI_CallbackSet(&spi_ctrl_3, user_master_callback);
     SPI_CallbackSet(&spi_ctrl_4, user_slave_callback);
 
-    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
     SPI_Write(&spi_ctrl_4, &src_slave, SPI_TEST_SIZE);
+    BSP_IO_Write(BSP_IO_PORTA_PIN_4, BSP_IO_STATE_LOW);
     SPI_Read(&spi_ctrl_3, &dest_master, SPI_TEST_SIZE);
 
     while((master_callback_status != SPI_CALLBACK_STATUS_RECEIVE_COMPLETE) || (slave_callback_status != SPI_CALLBACK_STATUS_TRANSMIT_COMPLETE));
@@ -2062,7 +2062,8 @@ void spi_run_test(void)
 
     /* Master receive - Slave transmit  */
     spi_set_up_test();
-    spi_master_slave_tx_rx_test_case();
+    spi_master_slave_tx_rx_test_case(); /* Lower the CPU clock to achive better result since the master 
+                                         * faster than slave */
 }
 
 #endif
