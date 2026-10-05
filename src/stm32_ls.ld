@@ -60,7 +60,7 @@ SECTIONS
     {
         . = ALIGN(4);
         _sheap = .;          /* Start of heap symbol */
-        *(.heap*)
+        KEEP(*(.heap*))
         _eheap = .;          /* End of heap symbol */
         . = ALIGN(4);
     } > SRAM
@@ -69,7 +69,7 @@ SECTIONS
     {
         . = ALIGN(4);
         _sstack = .;
-        *(.stack*)
+        KEEP(*(.stack*))
         _estack = .;
         . = ALIGN(4);
         end = .;

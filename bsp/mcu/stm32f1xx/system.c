@@ -18,7 +18,7 @@ extern uint32_t SystemClockHz;
 uint32_t bsp_main_stack[BSP_STACK_SIZE >> 2] __attribute__((section(".stack")));
 
 #if (BSP_HEAP_SIZE > 0)
-/* Heap heap */
+/* Heap region */
 uint32_t bsp_main_heap[BSP_STACK_SIZE >> 2] __attribute__((section(".heap")));
 #endif
 

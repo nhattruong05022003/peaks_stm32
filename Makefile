@@ -2,8 +2,8 @@ CC=arm-none-eabi-gcc.exe
 OBJCOPY=arm-none-eabi-objcopy.exe
 SIZE = arm-none-eabi-size.exe
 MACH=cortex-m3
-CFLAGS=-c -mcpu=$(MACH) -mthumb -std=gnu17 -Wall -Wextra -O0 $(INCLUDE)
-LDFLAGS= -mcpu=$(MACH) -mthumb --specs=nano.specs -L$(SRC_DIR) -T $(SRC_DIR)/stm32_ls.ld  $(SRC_DIR)/memory_regions.ld -Wl,-Map=$(OUTPUT_DIR)/final.map
+CFLAGS=-c -mcpu=$(MACH) -mthumb -std=gnu17 -Wall -Wextra -O2 -mfloat-abi=soft -g3 $(INCLUDE)
+LDFLAGS= -mcpu=$(MACH) -mthumb --specs=nano.specs -Wl,--gc-sections -L$(SRC_DIR) -T $(SRC_DIR)/stm32_ls.ld  $(SRC_DIR)/memory_regions.ld -Wl,-Map=$(OUTPUT_DIR)/final.map
 
 SRC_DIR=src
 LIB_DIR=lib
