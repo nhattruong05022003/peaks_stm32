@@ -12,13 +12,16 @@ extern uint32_t _la_data;
 extern uint32_t _sheap;
 extern uint32_t _eheap;
 
+extern void (*__init_array_start[])(void);
+extern void (*__init_array_end[])(void);
+
 extern uint32_t SystemClockHz;
 
 /* Stack region */
 uint32_t bsp_main_stack[BSP_STACK_SIZE >> 2] __attribute__((section(".stack")));
 
 #if (BSP_HEAP_SIZE > 0)
-/* Heap heap */
+/* Heap region */
 uint32_t bsp_main_heap[BSP_STACK_SIZE >> 2] __attribute__((section(".heap")));
 #endif
 
@@ -206,7 +209,14 @@ void System_Init(void)
         *pDest++ = 0;
     }
 
-    /* Call init function of std library */ 
+    /* Init constuctor */
+    int32_t count = __init_array_end - __init_array_start;
+    for(int32_t i = 0; i < count; i++)
+    {
+        __init_array_start[i]();
+    }
+
+    /* Call init function of std library */
 
     /* Set up clock */
     clock_init(); // Set up 72 MHz system clock
