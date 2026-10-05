@@ -22,7 +22,7 @@ void bsp_ioport_test_case(void)
     ASSERT(BSP_IO_Read(BSP_IO_PORTA_PIN_1) == BSP_IO_STATE_LOW);
 }
 
-uint8_t bsp_irq_num = 0xFFU;
+volatile uint8_t bsp_irq_num = 0xFFU;
 
 void WWDG_IRQHandler(void)
 {
@@ -92,7 +92,7 @@ void PendSV_Handler(void)
     BSP_IRQ_ClearPendingIRQ((IRQn_t) SVC_Handler_IRQ_Num);
 }
 
-uint8_t nmi_handler_execute = 0U;
+volatile uint8_t nmi_handler_execute = 0U;
 void NMI_Handler(void)
 {
     nmi_handler_execute = 1U;
@@ -118,6 +118,8 @@ void bsp_exception_test_case(void)
     nmi_handler_execute = 0U;
     /* Trigger NMI exception */
     BSP_IRQ_SetPendingNMIHandler();
+    volatile uint8_t timeout = 0xFFU;
+    while((timeout--) && (nmi_handler_execute == 0U));
     ASSERT(1U == nmi_handler_execute);
 }
 
