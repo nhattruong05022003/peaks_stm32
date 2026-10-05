@@ -25,9 +25,19 @@ SECTIONS
         *(.text.*)
         *(.init)
         *(.fini)
+        . = ALIGN(4);
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array))
+        PROVIDE_HIDDEN (__init_array_end = .);
+        . = ALIGN(4);
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP (*(SORT(.fini_array.*)))
+        KEEP (*(.fini_array))
+        PROVIDE_HIDDEN (__fini_array_end = .);
         *(.rodata)
         *(.rodata.*)
-        . = ALIGN(4); /*Align the address section (4 bytes)*/
+        . = ALIGN(4); /* Align the address section (4 bytes) */
         _etext = .; /* Store the updated location counter value into a symbol '_etext' */
     }> FLASH
 
@@ -60,7 +70,7 @@ SECTIONS
     {
         . = ALIGN(4);
         _sheap = .;          /* Start of heap symbol */
-        *(.heap*)
+        KEEP(*(.heap*))
         _eheap = .;          /* End of heap symbol */
         . = ALIGN(4);
     } > SRAM
@@ -69,7 +79,7 @@ SECTIONS
     {
         . = ALIGN(4);
         _sstack = .;
-        *(.stack*)
+        KEEP(*(.stack*))
         _estack = .;
         . = ALIGN(4);
         end = .;
