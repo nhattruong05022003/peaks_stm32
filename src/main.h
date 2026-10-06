@@ -5,6 +5,8 @@
 #include "dma.h"
 #include "spi.h"
 
+#define BLINKY_CONFIRM_TEST_PASS (0U)
+
 #define RUN_BSP_TEST_CASE (0U)
 #define RUN_DMA_TEST_CASE (0U)
 #define RUN_SPI_TEST_CASE (0U)
